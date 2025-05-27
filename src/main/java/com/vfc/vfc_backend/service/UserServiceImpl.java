@@ -62,4 +62,10 @@ public class UserServiceImpl implements UserService{
         Optional<User> result = userRepository.findByUserName(username);
         return result.orElse(null); // Return null if user not found
     }
+
+    @Override
+    public User findByUseremail(String email) {
+        Optional<User> result = userRepository.findByUserEmail(email);
+        return result.orElse(null); // Return null if user not found
+    }
 }

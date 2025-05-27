@@ -35,4 +35,31 @@ public class UserController {
             return "user-registration";
         }
     }
+
+    @GetMapping("/login")
+    public String showLoginPage(Model model) {
+        model.addAttribute("user", new User());
+        return "log-in"; // Returns login.html
+    }
+
+    @PostMapping("/login")
+    public String processLogin(
+            @ModelAttribute("user") User theUser, Model theModel) {
+
+        // Check if the username and password are valid using UserService
+        //User user = userService.findByUsername(theUser.getUserName());
+        User user = userService.findByUseremail(theUser.getUserEmail());
+
+        if (user != null && user.getUserPassword().equals(theUser.getUserPassword())) {
+            // Valid credentials, add username to model for main page
+            //theModel.addAttribute("user_name", user.getUserName());
+            //theModel.addAttribute("user_id", user.getUserId());
+            theModel.addAttribute("user", user);
+            return "dashboard"; // Redirect to main.html
+        } else {
+            // Invalid credentials, add error message and return to login page
+            theModel.addAttribute("error", "Invalid username or password");
+            return "log-in"; // Return to login.html
+        }
+    }
 }
