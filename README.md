@@ -1,6 +1,6 @@
-# Virtual Fitness Community (VFC) Backend
+# Virtual Fitness Community (VFC)
 
-This is the backend service for the Virtual Fitness Community (VFC) application, a cloud-based platform designed to help users track workouts, join fitness challenges, sync data from external apps, and engage with a fitness community. The backend is built with Spring Boot and integrates with Supabase (PostgreSQL) for data storage and authentication.
+This is the Virtual Fitness Community (VFC) application, a cloud-based platform designed to help users track workouts, join fitness challenges, sync data from external apps, and engage with a fitness community. The backend is built with Spring Boot and integrates with Supabase (PostgreSQL) for data storage and authentication.
 
 ## Features
 - User registration, login, and profile management
@@ -13,6 +13,7 @@ This is the backend service for the Virtual Fitness Community (VFC) application,
 
 ## Tech Stack
 - **Backend:** Java, Spring Boot
+- **Frontend:** HTML, CSS
 - **Database:** Supabase (PostgreSQL)
 - **API Integration:** RESTful APIs (Strava, Fitbit, etc.)
 - **DevOps:** Docker, Jenkins, AWS EC2
@@ -25,7 +26,7 @@ See [`PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) for a detailed breakdown of
 1. **Clone the repository:**
    ```bash
    git clone <repo-url>
-   cd vfc-backend
+   cd CT5179-Capstone
    ```
 2. **Configure Supabase connection:**
    - Get your Supabase database credentials from your Supabase project dashboard:
