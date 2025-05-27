@@ -26,7 +26,7 @@ See [`PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) for a detailed breakdown of
 1. **Clone the repository:**
    ```bash
    git clone <repo-url>
-   cd vfc-backend
+   cd CT5179-Capstone
    ```
 2. **Configure Supabase connection:**
    - Get your Supabase database credentials from your Supabase project dashboard:
