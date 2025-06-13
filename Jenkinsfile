@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('GetProject') {
             steps {
-                git branch: 'main', url: 'https://github.com/dalyc117/TestRepo.git'
+                git branch: 'CD-Jenkins', url: 'https://github.com/CraigQ-College/CT5179-Capstone.git'
             }
         }
         stage('Build') {
