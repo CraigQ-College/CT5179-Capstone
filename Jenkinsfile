@@ -42,7 +42,7 @@ pipeline {
         stage('Archive'){
             steps {
                 archiveArtifacts allowEmptyArchive: true,
-                    artifacts:'**/VFC*.war'
+                    artifacts:'**/vfc*.war'
             }
         }
 
