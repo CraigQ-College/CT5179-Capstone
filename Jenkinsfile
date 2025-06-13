@@ -8,28 +8,34 @@ pipeline {
     stages {
         stage('GetProject') {
             steps {
-                git branch: 'main', url: 'https://github.com/CraigQ-College/CT5179-Capstone.git'
+                git branch: 'main', url: 'https://github.com/dalyc117/TestRepo.git'
             }
         }
         stage('Build') {
             steps {
-                sh "mvn clean:clean"
+                withMaven(maven: 'maven') {
+                    sh "mvn clean:clean"
 
-                sh "mvn dependency:copy-dependencies"
+                    sh "mvn dependency:copy-dependencies"
 
-                sh "mvn compiler:compile"
+                    sh "mvn compiler:compile"
+                }
             }
         }
 
         stage('Test') {
             steps {
-                sh "mvn surefire:test"
+                withMaven(maven: 'maven') {
+                    sh "mvn surefire:test"
+                }
             }
         }
 
         stage('Package'){
             steps {
-                sh 'mvn package'
+                withMaven(maven: 'maven') {
+                    sh 'mvn package'
+                }
             }
         }
 
@@ -43,7 +49,9 @@ pipeline {
         stage('Deploy'){
             steps {
                 echo "Initiating Deployment"
-                sh 'docker build -f Dockerfile -t vfc . ''
+                sh 'docker build -f Dockerfile -t vfc . '
+                sh 'docker rm -f "vfcwebcontainer" || true'
+                sh 'docker run --name "vfcwebcontainer" -p 9090:8080 --detach vfc:latest'
             }
         }
     }
