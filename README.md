@@ -1,5 +1,9 @@
 # Virtual Fitness Community (VFC)
 
+
+
+- This is a test
+  
 This is the Virtual Fitness Community (VFC) application, a cloud-based platform designed to help users track workouts, join fitness challenges, sync data from external apps, and engage with a fitness community. The backend is built with Spring Boot and integrates with Supabase (PostgreSQL) for data storage and authentication.
 
 ## Features
