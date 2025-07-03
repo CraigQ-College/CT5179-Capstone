@@ -48,7 +48,7 @@ public class UserController {
     public String registerUser(@ModelAttribute("user") User theUser, Model model) {
         try {
             User savedUser = userService.save(theUser);
-            String hashPassword = BCrypt.hashpw(savedUser.getUserPassword(),BCrypt.gensalt()); // Hash and Salt the users password before saving to DB
+            String hashPassword = BCrypt.hashpw(savedUser.getUserPassword(),BCrypt.gensalt()); // Hashed and Salted the users password before saving to DB
             savedUser.setUserPassword(hashPassword);
             model.addAttribute("user", savedUser);
             return "user-registration-summary";
