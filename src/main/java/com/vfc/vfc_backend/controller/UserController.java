@@ -8,6 +8,7 @@ import com.vfc.vfc_backend.service.WorkoutService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vfc.vfc_backend.service.UserService;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +48,8 @@ public class UserController {
     public String registerUser(@ModelAttribute("user") User theUser, Model model) {
         try {
             User savedUser = userService.save(theUser);
+            String hashPassword = BCrypt.hashpw(savedUser.getUserPassword(),BCrypt.gensalt()); // Hash and Salt the users password before saving to DB
+            savedUser.setUserPassword(hashPassword);
             model.addAttribute("user", savedUser);
             return "user-registration-summary";
         } catch (IllegalArgumentException e) {
@@ -216,19 +219,31 @@ public class UserController {
             @ModelAttribute("user") User user, HttpSession session, Model theModel) {
 
         // Check if the username and password are valid using UserService
-        //User user = userService.findByUsername(theUser.getUserName());
         User existingUser = userService.findByUseremail(user.getUserEmail());
 
 
-        if (existingUser != null && existingUser.getUserPassword().equals(user.getUserPassword())) {
-            // Valid credentials, add username to model for main page
-            //theModel.addAttribute("user_name", user.getUserName());
-            //theModel.addAttribute("user_id", user.getUserId());
-            //theModel.addAttribute("user", user);
+
+
+        // From Sarah:
+        // The login page is using the same setPassword function as the register page
+        // so here, you are checking if the hashed password from the db, also matches a randomly hashed password, which it never will
+        // When I use the checkpw function on the plaintext "text", it works
+        // You may be able to add some logic in the User class or the login html to work around this
+        System.out.println(BCrypt.checkpw("test", existingUser.getUserPassword()));
+        // The above prints 'true' because the hash from the db is a hash of the string 'true'
+
+
+
+
+
+        if (existingUser != null && BCrypt.checkpw(user.getUserPassword(), existingUser.getUserPassword())){ // Check encrypted password matches user input
+            System.out.println("It matches");
+            // Valid credentials, add user to session for main page
             session.setAttribute("user", existingUser);
-            //return "dashboard"; // Redirect to main.html
             return "redirect:/users/dashboard";
         } else {
+            System.out.println("User pass: " + user.getUserPassword());
+            System.out.println("Saved pass: " + existingUser.getUserPassword());
             // Invalid credentials, add error message and return to login page
             theModel.addAttribute("error", "Invalid username or password");
             return "log-in"; // Return to login.html

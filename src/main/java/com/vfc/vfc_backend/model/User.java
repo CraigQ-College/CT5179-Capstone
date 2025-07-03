@@ -1,6 +1,7 @@
 package com.vfc.vfc_backend.model;
 
 import jakarta.persistence.*;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 @Entity
 @Table(name="app_users")
