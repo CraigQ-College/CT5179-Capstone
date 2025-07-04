@@ -221,21 +221,6 @@ public class UserController {
         // Check if the username and password are valid using UserService
         User existingUser = userService.findByUseremail(user.getUserEmail());
 
-
-
-
-        // From Sarah:
-        // The login page is using the same setPassword function as the register page
-        // so here, you are checking if the hashed password from the db, also matches a randomly hashed password, which it never will
-        // When I use the checkpw function on the plaintext "text", it works
-        // You may be able to add some logic in the User class or the login html to work around this
-        System.out.println(BCrypt.checkpw("test", existingUser.getUserPassword()));
-        // The above prints 'true' because the hash from the db is a hash of the string 'true'
-
-
-
-
-
         if (existingUser != null && BCrypt.checkpw(user.getUserPassword(), existingUser.getUserPassword())){ // Check encrypted password matches user input
             System.out.println("It matches");
             // Valid credentials, add user to session for main page
