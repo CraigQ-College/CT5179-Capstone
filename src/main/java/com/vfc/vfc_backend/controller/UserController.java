@@ -8,6 +8,7 @@ import com.vfc.vfc_backend.service.WorkoutService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vfc.vfc_backend.service.UserService;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +47,8 @@ public class UserController {
     @PostMapping("/register")
     public String registerUser(@ModelAttribute("user") User theUser, Model model) {
         try {
+            String hashPassword = BCrypt.hashpw(theUser.getUserPassword(),BCrypt.gensalt()); // Hashed and Salted the users password before saving to DB
+            theUser.setUserPassword(hashPassword);
             User savedUser = userService.save(theUser);
             model.addAttribute("user", savedUser);
             return "user-registration-summary";
@@ -54,31 +57,8 @@ public class UserController {
             return "user-registration";
         }
     }
-/*
-    @PostMapping("/users")
-    public String listUsers(@ModelAttribute("user") User theUser, Model model) {
-        //model.addAttribute("user", new User());
-        int currentUserId = theUser.getUserId();
-        List<User> users = userService.findAll();
-
-        /*
-        // Create a map to store whether a friend request can be sent for each user
-        Map<Integer, Boolean> canSendFriendRequest = new HashMap<>();
-        for (User user : users) {
-            boolean canSend = user.getUserId() != currentUserId &&
-                    !friendService.isFriend(currentUserId, user.getUserId()) &&
-                    friendRequestRepository.findBySenderAndReceiver(
-                            userRepository.findById(currentUserId).orElse(null), user
-                    ).isEmpty();
-            canSendFriendRequest.put(user.getUserId(), canSend);
-        }
-        model.addAttribute("users", users);
-        model.addAttribute("currentUserId", currentUserId);
-        return "user-list";
-    }*/
 
     @PostMapping("/users")
-//public String listUsers(@ModelAttribute("user") User theUser, Model model) {
     public String listUsers(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
@@ -215,18 +195,11 @@ public class UserController {
     public String processLogin(
             @ModelAttribute("user") User user, HttpSession session, Model theModel) {
 
-        // Check if the username and password are valid using UserService
-        //User user = userService.findByUsername(theUser.getUserName());
         User existingUser = userService.findByUseremail(user.getUserEmail());
 
-
-        if (existingUser != null && existingUser.getUserPassword().equals(user.getUserPassword())) {
-            // Valid credentials, add username to model for main page
-            //theModel.addAttribute("user_name", user.getUserName());
-            //theModel.addAttribute("user_id", user.getUserId());
-            //theModel.addAttribute("user", user);
+        // Check if the username and password are valid using UserService
+        if (existingUser != null && BCrypt.checkpw(user.getUserPassword(), existingUser.getUserPassword())){
             session.setAttribute("user", existingUser);
-            //return "dashboard"; // Redirect to main.html
             return "redirect:/users/dashboard";
         } else {
             // Invalid credentials, add error message and return to login page
