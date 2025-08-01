@@ -68,7 +68,7 @@ public class UserServiceTests {
     public void returnNullUserIfIdDoesNotExist(){
         when(userRepository.findById(testUser.getUserId())).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class,() -> userServiceImpl.findById(0) );
+        assertThrows(RuntimeException.class,() -> userServiceImpl.findById(0));
     }
 
 }
