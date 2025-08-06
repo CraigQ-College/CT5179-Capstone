@@ -23,17 +23,7 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                withMaven(maven: 'maven') {
-                    sh "mvn install:install"
-
-                    sh "mvn surefire:test"
-                }
-            }
-        }
-
-        stage('Package'){
+        stage('Test and Package'){
             steps {
                 withMaven(maven: 'maven') {
                     sh 'mvn package'
