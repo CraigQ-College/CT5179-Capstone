@@ -1,0 +1,464 @@
+/* VFC - Virtual Fitness Community Custom Styles */
+/* Color Palette:
+   Primary Dark: #021526 (very dark blue)
+   Secondary Dark: #03346E (medium-dark blue) 
+   Accent Blue: #6EACDA (light sky blue)
+   Light Cream: #E2E2B6 (pale yellow/cream)
+*/
+
+/* CSS Custom Properties for consistent color usage */
+:root {
+    --vfc-primary-dark: #021526;
+    --vfc-secondary-dark: #03346E;
+    --vfc-accent-blue: #6EACDA;
+    --vfc-light-cream: #E2E2B6;
+    --vfc-text-light: #ffffff;
+    --vfc-text-muted: #adb5bd;
+    --vfc-border-color: #495057;
+    --vfc-card-bg: #1a1a1a;
+    --vfc-hover-bg: #2d2d2d;
+}
+
+/* Global Styles */
+body {
+    background-color: var(--vfc-primary-dark) !important;
+    color: var(--vfc-text-light) !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+/* Custom Background Classes */
+.bg-vfc-primary {
+    background-color: var(--vfc-primary-dark) !important;
+}
+
+.bg-vfc-secondary {
+    background-color: var(--vfc-secondary-dark) !important;
+}
+
+.bg-vfc-accent {
+    background-color: var(--vfc-accent-blue) !important;
+}
+
+.bg-vfc-light {
+    background-color: var(--vfc-light-cream) !important;
+}
+
+/* Custom Text Colors */
+.text-vfc-primary {
+    color: var(--vfc-primary-dark) !important;
+}
+
+.text-vfc-secondary {
+    color: var(--vfc-secondary-dark) !important;
+}
+
+.text-vfc-accent {
+    color: var(--vfc-accent-blue) !important;
+}
+
+.text-vfc-light {
+    color: var(--vfc-light-cream) !important;
+}
+
+/* Navigation Bar Customization */
+.navbar-dark {
+    background-color: var(--vfc-primary-dark) !important;
+    border-bottom: 2px solid var(--vfc-secondary-dark) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    color: var(--vfc-accent-blue) !important;
+}
+
+.navbar-brand:hover {
+    color: var(--vfc-light-cream) !important;
+}
+
+.nav-link {
+    color: var(--vfc-text-light) !important;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+    margin: 0 2px;
+    padding: 8px 12px !important;
+}
+
+.nav-link:hover {
+    color: var(--vfc-accent-blue) !important;
+    background-color: var(--vfc-secondary-dark) !important;
+    transform: translateY(-1px);
+}
+
+.nav-link.active {
+    background-color: var(--vfc-secondary-dark) !important;
+    color: var(--vfc-accent-blue) !important;
+    border: 1px solid var(--vfc-accent-blue);
+}
+
+/* Card Customization */
+.card {
+    background-color: var(--vfc-card-bg) !important;
+    border: 1px solid var(--vfc-border-color) !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    border-color: var(--vfc-accent-blue) !important;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    color: var(--vfc-accent-blue) !important;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Button Customization */
+.btn-primary {
+    background-color: var(--vfc-secondary-dark) !important;
+    border-color: var(--vfc-accent-blue) !important;
+    color: var(--vfc-text-light) !important;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--vfc-accent-blue) !important;
+    border-color: var(--vfc-accent-blue) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(110, 172, 218, 0.3);
+}
+
+.btn-outline-primary {
+    color: var(--vfc-accent-blue) !important;
+    border-color: var(--vfc-accent-blue) !important;
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--vfc-accent-blue) !important;
+    color: var(--vfc-primary-dark) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(110, 172, 218, 0.3);
+}
+
+.btn-success {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #218838 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-danger {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #c82333 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Form Controls */
+.form-control {
+    background-color: var(--vfc-card-bg) !important;
+    border: 1px solid var(--vfc-border-color) !important;
+    color: var(--vfc-text-light) !important;
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background-color: var(--vfc-card-bg) !important;
+    border-color: var(--vfc-accent-blue) !important;
+    color: var(--vfc-text-light) !important;
+    box-shadow: 0 0 0 0.2rem rgba(110, 172, 218, 0.25);
+}
+
+.form-control::placeholder {
+    color: var(--vfc-text-muted) !important;
+}
+
+.form-label {
+    color: var(--vfc-accent-blue) !important;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+/* Dropdown Customization */
+.dropdown-menu-dark {
+    background-color: var(--vfc-card-bg) !important;
+    border: 1px solid var(--vfc-border-color) !important;
+    border-radius: 8px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-item {
+    color: var(--vfc-text-light) !important;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: var(--vfc-secondary-dark) !important;
+    color: var(--vfc-accent-blue) !important;
+}
+
+.dropdown-divider {
+    border-color: var(--vfc-border-color) !important;
+}
+
+/* Alert Customization */
+.alert {
+    border-radius: 8px;
+    border: none;
+    padding: 1rem 1.25rem;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    color: #f8d7da !important;
+    border-left: 4px solid #dc3545;
+}
+
+.alert-success {
+    background-color: rgba(40, 167, 69, 0.1) !important;
+    color: #d4edda !important;
+    border-left: 4px solid #28a745;
+}
+
+.alert-info {
+    background-color: rgba(110, 172, 218, 0.1) !important;
+    color: var(--vfc-accent-blue) !important;
+    border-left: 4px solid var(--vfc-accent-blue);
+}
+
+/* Table Customization */
+.table {
+    color: var(--vfc-text-light) !important;
+}
+
+.table-dark {
+    background-color: var(--vfc-card-bg) !important;
+}
+
+.table-dark th {
+    background-color: var(--vfc-secondary-dark) !important;
+    border-color: var(--vfc-border-color) !important;
+    color: var(--vfc-accent-blue) !important;
+    font-weight: 600;
+}
+
+.table-dark td {
+    border-color: var(--vfc-border-color) !important;
+}
+
+/* Badge Customization */
+.badge {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
+
+.badge-primary {
+    background-color: var(--vfc-secondary-dark) !important;
+    color: var(--vfc-text-light) !important;
+}
+
+.badge-success {
+    background-color: #28a745 !important;
+    color: var(--vfc-text-light) !important;
+}
+
+.badge-warning {
+    background-color: #ffc107 !important;
+    color: var(--vfc-primary-dark) !important;
+}
+
+.badge-danger {
+    background-color: #dc3545 !important;
+    color: var(--vfc-text-light) !important;
+}
+
+/* Progress Bar Customization */
+.progress {
+    background-color: var(--vfc-card-bg) !important;
+    border-radius: 8px;
+    height: 12px;
+}
+
+.progress-bar {
+    background-color: var(--vfc-accent-blue) !important;
+    border-radius: 8px;
+}
+
+/* Modal Customization */
+.modal-content {
+    background-color: var(--vfc-card-bg) !important;
+    border: 1px solid var(--vfc-border-color) !important;
+    border-radius: 12px;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--vfc-border-color) !important;
+    background-color: var(--vfc-secondary-dark) !important;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--vfc-border-color) !important;
+}
+
+.modal-title {
+    color: var(--vfc-accent-blue) !important;
+    font-weight: 600;
+}
+
+/* Custom Utility Classes */
+.vfc-gradient-bg {
+    background: linear-gradient(135deg, var(--vfc-primary-dark) 0%, var(--vfc-secondary-dark) 100%);
+}
+
+.vfc-card-hover {
+    transition: all 0.3s ease;
+}
+
+.vfc-card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.vfc-text-gradient {
+    background: linear-gradient(45deg, var(--vfc-accent-blue), var(--vfc-light-cream));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Responsive Design Enhancements */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .navbar-nav {
+        margin-top: 1rem;
+    }
+    
+    .nav-link {
+        padding: 12px 16px !important;
+        margin: 2px 0;
+    }
+}
+
+/* Animation Classes */
+.vfc-fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.vfc-slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--vfc-primary-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--vfc-secondary-dark);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--vfc-accent-blue);
+}
+
+/* Focus States for Accessibility */
+.btn:focus,
+.form-control:focus,
+.nav-link:focus {
+    outline: 2px solid var(--vfc-accent-blue);
+    outline-offset: 2px;
+}
+
+/* Loading States */
+.vfc-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.vfc-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--vfc-accent-blue);
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
