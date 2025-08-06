@@ -46,7 +46,7 @@ public class WorkoutController {
         }
         workoutService.save(theWorkout);
         model.addAttribute("userId", theWorkout.getUserId());
-        return "redirect:/workouts/listWorkouts";
+        return "redirect:/users/dashboard";
     }
 
 
@@ -85,10 +85,8 @@ public class WorkoutController {
         int userId =  workout.getUserId();
         //delete the employee
         workoutService.deleteById(workoutId);
-        //redirect to the /employees/list
-        return "redirect:/workouts/listWorkouts";
-        //return "list-workouts";
-        //return "redirect:/workouts/workouts?userId=" + userId;
+        //redirect to the dashboard
+        return "redirect:/users/dashboard";
     }
 
     @GetMapping("/viewWorkout/{workoutId}")
