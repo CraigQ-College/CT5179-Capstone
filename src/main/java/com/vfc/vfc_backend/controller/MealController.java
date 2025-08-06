@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/meals")
 public class MealController {
@@ -43,15 +45,19 @@ public class MealController {
         }
 
     @GetMapping("/listMeals")
-    public String listMeal (@ModelAttribute("meal") Meal theMeal, HttpSession session, Model model){
+    public String listMeal (HttpSession session, Model model){
 
         User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/users/login";
+        }
 
         int userId = user.getUserId();
-
-        mealService.saveMeal(theMeal);
-        model.addAttribute("userId", theMeal.getUserId());
-        return "redirect:/users/dashboard";
+        List<Meal> meals = mealService.getAllMealsByUserId(userId);
+        model.addAttribute("meals", meals);
+        model.addAttribute("userId", userId);
+        model.addAttribute("user", user);
+        return "list-meals";
     }
 
 }

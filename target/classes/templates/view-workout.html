@@ -28,6 +28,7 @@
     <p><strong>User ID:</strong> <span th:text="${workout.userId}"></span></p>
     <p><strong>Workout Date:</strong> <span th:text="${workout.workoutDate}"></span></p>
 
+
     <!-- Cardio Workouts Section -->
     <h3>Cardio Exercises</h3>
     <table th:if="${#lists.size(workout.workoutExercises.?[exerciseType == 'CARDIO']) > 0}" class="table table-bordered table-striped">
