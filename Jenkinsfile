@@ -26,7 +26,7 @@ pipeline {
         stage('Test') {
             steps {
                 withMaven(maven: 'maven') {
-                    sh "mvn test:test"
+                    sh "mvn surefire:test"
                 }
             }
         }
