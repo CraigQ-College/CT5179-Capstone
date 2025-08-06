@@ -7,49 +7,188 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap CSS for styling -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom VFC Styles -->
+    <link href="/assets/styles/style.css" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        .login-container {
+            height: 100vh;
+            display: flex;
+        }
+        .logo-section {
+            background-color: #021526;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+        }
+        .form-section {
+            background-color: #FFFFFF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            padding: 2rem;
+        }
+        .login-card {
+            background-color: #021526;
+            border-radius: 8px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .form-control {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            color: #495057;
+            border-radius: 4px;
+            padding: 0.75rem;
+        }
+        .form-control:focus {
+            background-color: #ffffff;
+            border-color: #6EACDA;
+            box-shadow: 0 0 0 0.2rem rgba(110, 172, 218, 0.25);
+            color: #495057;
+        }
+        .form-control::placeholder {
+            color: #6c757d;
+        }
+        .btn-primary {
+            background-color: #021526;
+            border-color: #021526;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 4px;
+        }
+        .btn-primary:hover {
+            background-color: #03346E;
+            border-color: #03346E;
+            color: white;
+        }
+        .form-check-input:checked {
+            background-color: #021526;
+            border-color: #021526;
+        }
+        .text-accent {
+            color: #6EACDA;
+        }
+        .user-icon {
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+        .user-icon i {
+            font-size: 1.5rem;
+            color: #021526;
+        }
+        .login-card {
+            background-color: #021526;
+            border-radius: 8px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .login-form {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-fields {
+            flex: 1;
+        }
+        .form-actions {
+            margin-top: auto;
+        }
+    </style>
 </head>
-<body class="bg-dark text-light">
-<div class="container py-5">
-    <!-- Logo Section: Displays the VFC logo at the top of the page -->
-    <div class="text-center mb-4">
-        <img src="/assets/images/logo.png" alt="VFC Logo" class="img-fluid" style="max-width: 150px;">
+<body>
+    <div class="login-container">
+        <!-- Left Section - Logo Only -->
+        <div class="logo-section">
+            <div class="text-center">
+                <img src="/assets/images/logo.png" alt="VFC Logo" class="img-fluid" style="max-width: 300px;">
+            </div>
+        </div>
+
+        <!-- Right Section - Login Form -->
+        <div class="form-section">
+                         <div class="login-card">
+                 <!-- User Icon -->
+                 <div class="user-icon">
+                     <i class="bi bi-person"></i>
+                 </div>
+                 
+                 <!-- Title -->
+                 <div class="text-center mb-4">
+                     <h3 class="text-white mb-0">Sign In</h3>
+                 </div>
+
+                 <!-- Login Form -->
+                 <form action="#" th:action="@{/users/login}" th:object="${user}" method="POST" class="login-form">
+                     <div class="form-fields">
+                         <!-- Email input field -->
+                         <div class="mb-3">
+                             <label for="userEmail" class="form-label text-white">
+                                 Email address
+                             </label>
+                             <input type="email" th:field="*{userEmail}" id="userEmail" class="form-control" placeholder="Enter your email" required>
+                         </div>
+
+                         <!-- Password input field -->
+                         <div class="mb-3">
+                             <label for="userPassword" class="form-label text-white">
+                                 Password
+                             </label>
+                             <input type="password" th:field="*{userPassword}" id="userPassword" class="form-control" placeholder="Enter your password" required>
+                         </div>
+
+                         <!-- Error Message Section -->
+                         <div th:if="${error}" class="alert alert-danger bg-danger bg-opacity-25 border-danger mb-3">
+                             <i class="bi bi-exclamation-triangle me-2"></i>
+                             <span th:text="${error}"></span>
+                         </div>
+                     </div>
+
+                     <div class="form-actions">
+                         <!-- Submit button -->
+                         <button type="submit" class="btn btn-primary w-100 mb-3">
+                             Login
+                         </button>
+
+                         <!-- Additional links -->
+                         <div class="text-center">
+                             <a href="/forgot-password" class="text-accent text-decoration-none">
+                                 Forgot Password?
+                             </a>
+                             <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
+                             <p class="text-white-50 mb-0">
+                                 Don't have an account? 
+                                 <a href="/users/register" class="text-accent text-decoration-none">Sign Up</a>
+                             </p>
+                         </div>
+                     </div>
+                 </form>
+             </div>
+        </div>
     </div>
 
-    <!-- Error Message Section: Displays any error messages if they exist -->
-    <div th:if="${error}" class="alert alert-danger">
-        <p th:text="${error}" class="mb-0"></p>
-    </div>
-
-    <!-- Login Form Section: Main form for user authentication -->
-    <h3 class="text-center mb-4">Login</h3>
-    <form action="#" th:action="@{/users/login}" th:object="${user}" method="POST">
-        <!-- Email input field -->
-        <div class="mb-3">
-            <label for="userEmail" class="form-label">Email</label>
-            <input type="email" th:field="*{userEmail}" id="userEmail" class="form-control" placeholder="Enter your email">
-        </div>
-
-        <!-- Password input field -->
-        <div class="mb-3">
-            <label for="userPassword" class="form-label">Password</label>
-            <input type="password" th:field="*{userPassword}" id="userPassword" class="form-control" placeholder="Enter your password">
-        </div>
-
-        <!-- Remember me checkbox -->
-        <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="rememberMe">
-            <label class="form-check-label" for="rememberMe">Remember me</label>
-        </div>
-
-        <!-- Submit button for the form -->
-        <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
-
-        <!-- Additional links section -->
-        <div class="text-center">
-            <a href="/forgot-password" class="text-light text-decoration-none">Forgot Password?</a>
-            <p class="mt-3">Don't have an account? <a href="/sign-up" class="text-light text-decoration-none">Sign Up</a></p>
-        </div>
-    </form>
-</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous"></script>
 </body>
 </html>

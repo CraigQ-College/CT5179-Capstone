@@ -45,13 +45,30 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute("user") User theUser, Model model) {
+    public String registerUser(@ModelAttribute("user") User theUser, Model model, HttpSession session) {
         try {
+            // Check if user with this email already exists
+            User existingUser = userService.findByUseremail(theUser.getUserEmail());
+            if (existingUser != null) {
+                model.addAttribute("error", "A user with this email already exists");
+                return "user-registration";
+            }
+            
+            // Check if user with this username already exists
+            User existingUsername = userService.findByUsername(theUser.getUserName());
+            if (existingUsername != null) {
+                model.addAttribute("error", "A user with this username already exists");
+                return "user-registration";
+            }
+            
             String hashPassword = BCrypt.hashpw(theUser.getUserPassword(),BCrypt.gensalt()); // Hashed and Salted the users password before saving to DB
             theUser.setUserPassword(hashPassword);
             User savedUser = userService.save(theUser);
-            model.addAttribute("user", savedUser);
-            return "user-registration-summary";
+            
+            // Automatically log in the user after successful registration
+            session.setAttribute("user", savedUser);
+            
+            return "redirect:/users/dashboard";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", "Passwords do not match");
             return "user-registration";
@@ -177,12 +194,31 @@ public class UserController {
         return "redirect:/requests/pending";
     }
 
+    @GetMapping("/friends")
+    public String listFriends(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+        
+        int currentUserId = user.getUserId();
+        List<User> friends = friendService.getFriends(currentUserId);
+        model.addAttribute("friends", friends);
+        model.addAttribute("user", user);
+        return "friends-list";
+    }
+
     @PostMapping("/friends")
-    public String listFriends(@ModelAttribute("user") User theUser,Model model) {
+    public String listFriendsPost(@ModelAttribute("user") User theUser, Model model) {
         int currentUserId = theUser.getUserId();
         List<User> friends = friendService.getFriends(currentUserId);
         model.addAttribute("friends", friends);
         return "friends-list";
+    }
+
+    @GetMapping("/")
+    public String redirectToLogin() {
+        return "redirect:/users/login";
     }
 
     @GetMapping("/login")
@@ -226,7 +262,16 @@ public class UserController {
         // Fetch last 3 friendships
         List<Friendship> lastThreeFriendships = friendService.getLastThreeFriendshipsByUserId(userId);
 
+        // Fetch all friends for the current user
+        List<User> friends = friendService.getFriends(userId);
+
+        // Fetch pending friend requests
+        List<FriendRequest> pendingRequests = friendService.getPendingRequests(userId);
+
         model.addAttribute("lastThreeFriendships", lastThreeFriendships);
+        model.addAttribute("friends", friends);
+        model.addAttribute("pendingRequests", pendingRequests);
+        model.addAttribute("pendingRequestsCount", pendingRequests.size());
 
         // Add to model
         model.addAttribute("lastThreeWorkouts", lastThreeWorkouts);
