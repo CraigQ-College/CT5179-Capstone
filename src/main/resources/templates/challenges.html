@@ -1,3 +1,9 @@
+<!--
+    Created by: Craig Quinn
+    This template is used to display the challenges page
+    It includes the active, upcoming, and completed challenges
+-->
+
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -10,6 +16,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom VFC Styles -->
+    <link href="/assets/styles/style.css" rel="stylesheet">
 </head>
 <body class="bg-dark text-light">
     <!-- Navigation Bar -->
@@ -29,19 +37,19 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard"><i class="bi bi-house-door"></i> Dashboard</a>
+                        <a class="nav-link" th:href="@{/users/dashboard}"><i class="bi bi-house-door"></i> Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/log-workout"><i class="bi bi-plus-circle"></i> Log Workout</a>
+                        <a class="nav-link" th:href="@{/workouts/addWorkout(userId=${user.userId})}"><i class="bi bi-plus-circle"></i> Log Workout</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/log-meal"><i class="bi bi-cup-hot"></i> Log Meal</a>
+                        <a class="nav-link" th:href="@{/meals/addMeal(userId=${user.userId})}"><i class="bi bi-cup-hot"></i> Log Meal</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/challenges"><i class="bi bi-trophy"></i> Challenges</a>
+                        <a class="nav-link active" th:href="@{/challenges}"><i class="bi bi-trophy"></i> Challenges</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/leaderboard"><i class="bi bi-bar-chart"></i> Leaderboard</a>
+                        <a class="nav-link" th:href="@{/leaderboard}"><i class="bi bi-bar-chart"></i> Leaderboard</a>
                     </li>
                 </ul>
                 
@@ -52,10 +60,10 @@
                             <i class="bi bi-person-circle"></i> <span th:text="${user.userName}">User</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark">
-                            <li><a class="dropdown-item" href="/profile"><i class="bi bi-person"></i> Profile</a></li>
-                            <li><a class="dropdown-item" href="/settings"><i class="bi bi-gear"></i> Settings</a></li>
+                            <li><a class="dropdown-item" th:href="@{/users/users/{id}(id=${user.userId})}"><i class="bi bi-person"></i> Profile</a></li>
+                            <li><a class="dropdown-item" th:href="@{/users/pending}"><i class="bi bi-people"></i> Friend Requests</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                            <li><a class="dropdown-item" th:href="@{/users/logout}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
                         </ul>
                     </div>
                 </div>
@@ -64,145 +72,355 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container py-4">
-        <!-- Page Header -->
+    <div class="container mt-4">
+        <!-- Success/Error Messages -->
+        <div th:if="${param.joined}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> Successfully joined the challenge!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${param.left}" class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill"></i> Successfully left the challenge.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> 
+            <span th:if="${param.error == 'join_failed'}">Failed to join the challenge. Please try again.</span>
+            <span th:if="${param.error == 'leave_failed'}">Failed to leave the challenge. Please try again.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Page Header with Challenge Image -->
         <div class="row mb-4">
-            <div class="col">
-                <h2>Fitness Challenges</h2>
-                <p class="text-muted">Join challenges and compete with the VFC community.</p>
+            <div class="col text-center">
+                <img src="/assets/images/challenges.png" alt="Challenges" class="mb-3" style="max-height: 80px;">
+                <h2 class="text-white mb-2">Fitness Challenges</h2>
+                <p class="text-white-50">Join challenges and compete with the FYT community.</p>
             </div>
         </div>
 
-        <!-- Challenge Categories -->
+        <!-- Challenge Stats Cards -->
+        <!-- This section displays key statistics about the user's challenge participation -->
+        <!-- Shows counts for active challenges, completed challenges, and upcoming weekly/monthly challenges -->
         <div class="row mb-4">
-            <div class="col">
-                <ul class="nav nav-pills" id="challengeTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="active-tab" data-bs-toggle="pill" data-bs-target="#active" type="button" role="tab">
-                            <i class="bi bi-play-circle"></i> Active Challenges
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="upcoming-tab" data-bs-toggle="pill" data-bs-target="#upcoming" type="button" role="tab">
-                            <i class="bi bi-calendar-plus"></i> Upcoming
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="completed-tab" data-bs-toggle="pill" data-bs-target="#completed" type="button" role="tab">
-                            <i class="bi bi-check-circle"></i> Completed
-                        </button>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Challenge Content -->
-        <div class="tab-content" id="challengeTabContent">
-            <!-- Active Challenges -->
-            <div class="tab-pane fade show active" id="active" role="tabpanel">
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                    <div th:each="challenge : ${activeChallenges}" class="col">
-                        <div class="card bg-dark border-secondary h-100">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0" th:text="${challenge.name}">Challenge Name</h5>
-                                <span class="badge bg-primary" th:text="${challenge.type}">Type</span>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text" th:text="${challenge.description}">Challenge description goes here.</p>
-                                <div class="progress mb-3">
-                                    <div class="progress-bar" role="progressbar" th:style="'width: ' + ${challenge.progress} + '%'" th:text="${challenge.progress} + '%'"></div>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted" th:text="${challenge.daysLeft} + ' days left'">7 days left</small>
-                                    <small class="text-muted" th:text="${challenge.participants} + ' participants'">42 participants</small>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <a th:href="@{'/challenges/' + ${challenge.id}}" class="btn btn-primary w-100">
-                                    <i class="bi bi-arrow-right-circle"></i> View Details
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Upcoming Challenges -->
-            <div class="tab-pane fade" id="upcoming" role="tabpanel">
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                    <div th:each="challenge : ${upcomingChallenges}" class="col">
-                        <div class="card bg-dark border-secondary h-100">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0" th:text="${challenge.name}">Challenge Name</h5>
-                                <span class="badge bg-info" th:text="${challenge.type}">Type</span>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text" th:text="${challenge.description}">Challenge description goes here.</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted" th:text="'Starts in ' + ${challenge.daysUntilStart} + ' days'">Starts in 3 days</small>
-                                    <small class="text-muted" th:text="${challenge.duration} + ' days'">30 days</small>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <button class="btn btn-primary w-100" th:onclick="'joinChallenge(' + ${challenge.id} + ')'">
-                                    <i class="bi bi-plus-circle"></i> Join Challenge
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Completed Challenges -->
-            <div class="tab-pane fade" id="completed" role="tabpanel">
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                    <div th:each="challenge : ${completedChallenges}" class="col">
-                        <div class="card bg-dark border-secondary h-100">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0" th:text="${challenge.name}">Challenge Name</h5>
-                                <span class="badge bg-success" th:text="${challenge.type}">Type</span>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text" th:text="${challenge.description}">Challenge description goes here.</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted" th:text="'Completed ' + ${challenge.completionDate}">Completed 2024-02-15</small>
-                                    <small class="text-muted" th:text="'Rank: ' + ${challenge.rank}">Rank: #5</small>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <a th:href="@{'/challenges/' + ${challenge.id}}" class="btn btn-secondary w-100">
-                                    <i class="bi bi-eye"></i> View Results
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Challenge Stats -->
-        <div class="row mt-4">
-            <div class="col-md-4 mx-auto">
-                <div class="card bg-dark border-secondary">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Your Challenge Stats</h5>
-                    </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="card bg-dark border-secondary text-center h-100">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Active Challenges:</span>
-                            <span class="fw-bold" th:text="${activeChallengeCount}">3</span>
+                        <i class="bi bi-play-circle-fill text-white fs-1"></i>
+                        <h5 class="card-title mt-2 text-white" th:text="${myActiveChallengeCount}">0</h5>
+                        <p class="card-text small text-white-50">My Active</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="card bg-dark border-secondary text-center h-100">
+                    <div class="card-body">
+                        <i class="bi bi-check-circle-fill text-white fs-1"></i>
+                        <h5 class="card-title mt-2 text-white" th:text="${myCompletedChallengeCount}">0</h5>
+                        <p class="card-text small text-white-50">My Completed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="card bg-dark border-secondary text-center h-100">
+                    <div class="card-body">
+                        <i class="bi bi-calendar-week text-white fs-1"></i>
+                        <h5 class="card-title mt-2 text-white" th:text="${availableWeeklyCount}">0</h5>
+                        <p class="card-text small text-white-50">Upcoming Weekly</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="card bg-dark border-secondary text-center h-100">
+                    <div class="card-body">
+                        <i class="bi bi-calendar-month text-white fs-1"></i>
+                        <h5 class="card-title mt-2 text-white" th:text="${availableMonthlyCount}">0</h5>
+                        <p class="card-text small text-white-50">Upcoming Monthly</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Challenges Section -->
+        <!-- This section displays all challenges that the current user has joined -->
+        <!-- Shows active challenges with progress bars, upcoming challenges, and completed challenges -->
+        <!-- Users can click "Details" to view full challenge information and leaderboards -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-dark border-secondary">
+                    <div class="card-header bg-dark border-secondary">
+                        <h5 class="mb-0 text-white"><i class="bi bi-trophy text-white"></i> My Challenges</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th class="text-white">Challenge Name</th>
+                                        <th class="text-white">Type</th>
+                                        <th class="text-white">Status</th>
+                                        <th class="text-white">Progress</th>
+                                        <th class="text-white">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="challenge : ${myChallenges}">
+                                        <td class="text-white" th:text="${challenge.challengeName}">Challenge Name</td>
+                                        <td>
+                                            <span class="badge bg-secondary text-white" th:text="${challenge.challengeType}">Type</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${challenge.status == 'ACTIVE'}" class="badge bg-success text-white">Active</span>
+                                            <span th:if="${challenge.status == 'UPCOMING'}" class="badge bg-info text-white">Upcoming</span>
+                                            <span th:if="${challenge.status == 'COMPLETED'}" class="badge bg-secondary text-white">Completed</span>
+                                        </td>
+                                        <td>
+                                            <div th:if="${challenge.status == 'ACTIVE'}" class="progress" style="height: 20px; width: 100px;">
+                                                <div class="progress-bar bg-secondary" role="progressbar" 
+                                                     th:style="'width: ' + ${challenge.progressPercentage} + '%'" 
+                                                     th:text="${challenge.progressPercentage} + '%'">0%</div>
+                                            </div>
+                                            <span th:if="${challenge.status == 'UPCOMING'}" class="text-white-50">Not Started</span>
+                                        </td>
+                                        <td>
+                                            <a th:href="@{'/challenges/' + ${challenge.challengeId}}" 
+                                               class="btn btn-secondary btn-sm">
+                                                <i class="bi bi-arrow-right-circle"></i> Details
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(myChallenges)}">
+                                        <td colspan="5" class="text-center text-white-50 py-4">
+                                            <i class="bi bi-trophy" style="font-size: 2rem;"></i>
+                                            <p class="mt-2 mb-0">You haven't joined any challenges yet</p>
+                                            <p class="text-white-50 small">Join challenges below to get started!</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Completed Challenges:</span>
-                            <span class="fw-bold" th:text="${completedChallengeCount}">12</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Active Challenges Section -->
+        <!-- This section displays challenges that are currently running and available to join -->
+        <!-- Shows challenges that have started but not ended, and the user hasn't joined yet -->
+        <!-- Users can click "Join Challenge" to participate, or see "Joined" if already participating -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-dark border-secondary">
+                    <div class="card-header bg-dark border-secondary">
+                        <h5 class="mb-0 text-white"><i class="bi bi-play-circle text-white"></i> Available Active Challenges</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th class="text-white">Challenge Name</th>
+                                        <th class="text-white">Type</th>
+                                        <th class="text-white">Requirements</th>
+                                        <th class="text-white">End Date</th>
+                                        <th class="text-white">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="challenge : ${availableActiveChallenges}">
+                                        <td class="text-white" th:text="${challenge.challengeName}">Challenge Name</td>
+                                        <td>
+                                            <span class="badge bg-secondary text-white" th:text="${challenge.challengeType}">Type</span>
+                                        </td>
+                                        <td class="text-white-50" th:text="${challenge.requirements}">Requirements</td>
+                                        <td class="text-white-50" th:text="${#temporals.format(challenge.endDate, 'MMM dd, yyyy')}">End Date</td>
+                                        <td>
+                                            <div th:if="${userJoinedChallengeIds.contains(challenge.challengeId)}" class="text-success">
+                                                <i class="bi bi-check-circle-fill"></i> Joined
+                                            </div>
+                                            <form th:if="${!userJoinedChallengeIds.contains(challenge.challengeId)}" 
+                                                  th:action="@{'/challenges/' + ${challenge.challengeId} + '/join'}" 
+                                                  method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-secondary btn-sm">
+                                                    <i class="bi bi-plus-circle"></i> Join Challenge
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(availableActiveChallenges)}">
+                                        <td colspan="5" class="text-center text-white-50 py-4">
+                                            <i class="bi bi-play-circle" style="font-size: 2rem;"></i>
+                                            <p class="mt-2 mb-0">No active challenges available to join</p>
+                                            <p class="text-white-50 small">Check upcoming challenges below!</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Total Points Earned:</span>
-                            <span class="fw-bold" th:text="${challengePoints}">5,000</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Weekly Challenges Section -->
+        <!-- This section displays challenges that will start within the next week -->
+        <!-- Shows upcoming challenges with start and end dates, allowing users to plan ahead -->
+        <!-- Users can join these challenges before they start to be ready when they begin -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-dark border-secondary">
+                    <div class="card-header bg-dark border-secondary">
+                        <h5 class="mb-0 text-white"><i class="bi bi-calendar-week text-white"></i> Available Weekly Challenges</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th class="text-white">Challenge Name</th>
+                                        <th class="text-white">Requirements</th>
+                                        <th class="text-white">Start Date</th>
+                                        <th class="text-white">End Date</th>
+                                        <th class="text-white">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="challenge : ${availableWeeklyChallenges}">
+                                        <td class="text-white" th:text="${challenge.challengeName}">Challenge Name</td>
+                                        <td class="text-white-50" th:text="${challenge.requirements}">Requirements</td>
+                                        <td class="text-white-50" th:text="${#temporals.format(challenge.startDate, 'MMM dd, yyyy')}">Start Date</td>
+                                        <td class="text-white-50" th:text="${#temporals.format(challenge.endDate, 'MMM dd, yyyy')}">End Date</td>
+                                        <td>
+                                            <div th:if="${userJoinedChallengeIds.contains(challenge.challengeId)}" class="text-success">
+                                                <i class="bi bi-check-circle-fill"></i> Joined
+                                            </div>
+                                            <form th:if="${!userJoinedChallengeIds.contains(challenge.challengeId)}" 
+                                                  th:action="@{'/challenges/' + ${challenge.challengeId} + '/join'}" 
+                                                  method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-secondary btn-sm">
+                                                    <i class="bi bi-plus-circle"></i> Join Challenge
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(availableWeeklyChallenges)}">
+                                        <td colspan="5" class="text-center text-white-50 py-4">
+                                            <i class="bi bi-calendar-week" style="font-size: 2rem;"></i>
+                                            <p class="mt-2 mb-0">No new weekly challenges available yet</p>
+                                            <p class="text-white-50 small">Please check back soon!</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <span>Best Rank:</span>
-                            <span class="fw-bold" th:text="${bestRank}">#1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Monthly Challenges Section -->
+        <!-- This section displays challenges that will start within the next month -->
+        <!-- Shows longer-term challenges that users can plan for and join in advance -->
+        <!-- These are typically more intensive challenges that require more preparation -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-dark border-secondary">
+                    <div class="card-header bg-dark border-secondary">
+                        <h5 class="mb-0 text-white"><i class="bi bi-calendar-month text-white"></i> Available Monthly Challenges</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th class="text-white">Challenge Name</th>
+                                        <th class="text-white">Requirements</th>
+                                        <th class="text-white">Start Date</th>
+                                        <th class="text-white">End Date</th>
+                                        <th class="text-white">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="challenge : ${availableMonthlyChallenges}">
+                                        <td class="text-white" th:text="${challenge.challengeName}">Challenge Name</td>
+                                        <td class="text-white-50" th:text="${challenge.requirements}">Requirements</td>
+                                        <td class="text-white-50" th:text="${#temporals.format(challenge.startDate, 'MMM dd, yyyy')}">Start Date</td>
+                                        <td class="text-white-50" th:text="${#temporals.format(challenge.endDate, 'MMM dd, yyyy')}">End Date</td>
+                                        <td>
+                                            <div th:if="${userJoinedChallengeIds.contains(challenge.challengeId)}" class="text-success">
+                                                <i class="bi bi-check-circle-fill"></i> Joined
+                                            </div>
+                                            <form th:if="${!userJoinedChallengeIds.contains(challenge.challengeId)}" 
+                                                  th:action="@{'/challenges/' + ${challenge.challengeId} + '/join'}" 
+                                                  method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-secondary btn-sm">
+                                                    <i class="bi bi-plus-circle"></i> Join Challenge
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(availableMonthlyChallenges)}">
+                                        <td colspan="5" class="text-center text-white-50 py-4">
+                                            <i class="bi bi-calendar-month" style="font-size: 2rem;"></i>
+                                            <p class="mt-2 mb-0">No new monthly challenges available yet</p>
+                                            <p class="text-white-50 small">Please check back soon!</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Completed Challenges Section -->
+        <!-- This section displays all challenges that the user has successfully completed -->
+        <!-- Shows past achievements and allows users to view their final results and rankings -->
+        <!-- Users can click "View Results" to see detailed completion information and leaderboards -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-dark border-secondary">
+                    <div class="card-header bg-dark border-secondary">
+                        <h5 class="mb-0 text-white"><i class="bi bi-check-circle text-white"></i> My Completed Challenges</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th class="text-white">Challenge Name</th>
+                                        <th class="text-white">Type</th>
+                                        <th class="text-white">Requirements</th>
+                                        <th class="text-white">Completed Date</th>
+                                        <th class="text-white">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="challenge : ${myCompletedChallenges}">
+                                        <td class="text-white" th:text="${challenge.challengeName}">Challenge Name</td>
+                                        <td>
+                                            <span class="badge bg-secondary text-white" th:text="${challenge.challengeType}">Type</span>
+                                        </td>
+                                        <td class="text-white-50" th:text="${challenge.requirements}">Requirements</td>
+                                        <td class="text-white-50" th:text="${#temporals.format(challenge.endDate, 'MMM dd, yyyy')}">Completed Date</td>
+                                        <td>
+                                            <a th:href="@{'/challenges/' + ${challenge.challengeId}}" 
+                                               class="btn btn-secondary btn-sm">
+                                                <i class="bi bi-eye"></i> View Results
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(myCompletedChallenges)}">
+                                        <td colspan="5" class="text-center text-white-50 py-4">
+                                            <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                                            <p class="mt-2 mb-0">All of the past challenges you took part in will appear here</p>
+                                            <p class="text-white-50 small">Complete challenges to see your achievements!</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

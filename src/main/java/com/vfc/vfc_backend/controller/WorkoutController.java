@@ -4,6 +4,7 @@ import com.vfc.vfc_backend.model.User;
 import com.vfc.vfc_backend.model.Workout;
 import com.vfc.vfc_backend.model.WorkoutExercise;
 import com.vfc.vfc_backend.service.WorkoutService;
+import com.vfc.vfc_backend.service.ChallengeProgressService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,9 @@ public class WorkoutController {
 
     @Autowired
     private WorkoutService workoutService;
+    
+    @Autowired
+    private ChallengeProgressService challengeProgressService;
 
     @GetMapping("/addWorkout")
     public String showFormForAddWorkout(@ModelAttribute("workout") Workout theWorkout, HttpSession session, Model model){
@@ -45,6 +49,10 @@ public class WorkoutController {
             we.setWorkout(theWorkout);
         }
         workoutService.save(theWorkout);
+        
+        // Update challenge progress after saving workout
+        challengeProgressService.updateChallengeProgress(theWorkout.getUserId(), theWorkout.getWorkoutId());
+        
         model.addAttribute("userId", theWorkout.getUserId());
         return "redirect:/users/dashboard";
     }

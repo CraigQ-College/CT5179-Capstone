@@ -1,12 +1,12 @@
 package com.vfc.vfc_backend.controller;
 
 import com.vfc.vfc_backend.model.*;
-import com.vfc.vfc_backend.repository.FriendRequestRepository;
 import com.vfc.vfc_backend.service.FriendService;
 import com.vfc.vfc_backend.service.MealService;
 import com.vfc.vfc_backend.service.WorkoutService;
+import com.vfc.vfc_backend.service.ChallengeService;
+import com.vfc.vfc_backend.service.ChallengeProgressService;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.vfc.vfc_backend.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Controller;
@@ -28,14 +28,18 @@ public class UserController {
 
     private WorkoutService workoutService;
     private MealService mealService;
+    private ChallengeService challengeService;
+    private ChallengeProgressService challengeProgressService;
 
 
 
-    public UserController(UserService theUserService, FriendService friendService,WorkoutService workoutService,MealService mealService) {
+    public UserController(UserService theUserService, FriendService friendService,WorkoutService workoutService,MealService mealService, ChallengeService challengeService, ChallengeProgressService challengeProgressService) {
         this.userService = theUserService;
         this.friendService = friendService;
         this.workoutService =workoutService;
         this.mealService =mealService;
+        this.challengeService = challengeService;
+        this.challengeProgressService = challengeProgressService;
     }
 
     @GetMapping("/register")
@@ -278,13 +282,28 @@ public class UserController {
         model.addAttribute("lastThreeMeals", lastThreeMeals);
 
         model.addAttribute("user", user);
+        
+        // get challenge data for dashboard
+        long activeChallengesCount = challengeService.countActiveChallenges();
+        List<Challenge> activeChallengesList = challengeService.getActiveChallenges();
+        
+        // Get user's active challenge participations with progress
+        List<ChallengeParticipant> userActiveChallenges = challengeProgressService.getUserActiveChallenges(userId);
+        
+        // Calculate challenge statistics
+        long completedChallengesCount = challengeService.countCompletedChallenges();
+        long userActiveChallengesCount = userActiveChallenges.size();
+        
         // Placeholder for dashboard attributes (replace with actual service calls)
         model.addAttribute("todayCalories", 0);
         model.addAttribute("weeklyWorkouts", 0);
-        model.addAttribute("activeChallenges", 0);
+        model.addAttribute("activeChallenges", activeChallengesCount);
         model.addAttribute("currentStreak", 0);
         model.addAttribute("recentWorkouts", Collections.emptyList());
-        model.addAttribute("activeChallengesList", Collections.emptyList());
+        model.addAttribute("activeChallengesList", activeChallengesList);
+        model.addAttribute("userActiveChallenges", userActiveChallenges);
+        model.addAttribute("userActiveChallengesCount", userActiveChallengesCount);
+        model.addAttribute("completedChallengesCount", completedChallengesCount);
         return "dashboard";
     }
 

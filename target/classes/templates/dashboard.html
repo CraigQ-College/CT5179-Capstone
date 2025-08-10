@@ -397,6 +397,22 @@
                                      </div>
                                  </div>
                              </div>
+                             
+                             <!-- Challenge Stats Row -->
+                             <div class="row text-center mb-3">
+                                 <div class="col-6 p-0">
+                                     <div class="border-end border-secondary h-100 d-flex flex-column justify-content-center user-stats-item p-2" style="cursor: pointer;">
+                                         <h6 class="mb-0 text-white" th:text="${userActiveChallengesCount}">0</h6>
+                                         <small class="text-white">Challenges Joined</small>
+                                     </div>
+                                 </div>
+                                 <div class="col-6 p-0">
+                                     <div class="h-100 d-flex flex-column justify-content-center user-stats-item p-2" style="cursor: pointer;">
+                                         <h6 class="mb-0 text-white" th:text="${completedChallengesCount}">0</h6>
+                                         <small class="text-white">Challenges Completed</small>
+                                     </div>
+                                 </div>
+                             </div>
 
                             <!-- Today's Progress -->
                             <div class="text-start">
@@ -426,30 +442,35 @@
                     <!-- Challenges Section -->
                     <div class="card bg-dark border-secondary mb-4">
                         <div class="card-header">
-                            <h6 class="mb-0 text-white">Challenges</h6>
+                            <h6 class="mb-0 text-white">My Challenges</h6>
                         </div>
                         <div class="card-body">
-                                                         <!-- Current Challenge Progress -->
-                             <div class="mb-3">
-                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                     <h6 class="mb-0 text-white">30-Day Challenge</h6>
-                                     <span class="badge bg-secondary">75%</span>
-                                 </div>
-                                 <div class="progress mb-3" style="height: 8px;">
-                                     <div class="progress-bar bg-secondary" style="width: 75%"></div>
-                                 </div>
-                                 <p class="text-white small mb-0">22 days completed</p>
-                             </div>
+                            <!-- User's Active Challenges -->
+                            <div th:if="${not #lists.isEmpty(userActiveChallenges)}" class="mb-3">
+                                <div th:each="participation : ${userActiveChallenges}" class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small class="text-white" th:text="${participation.challengeName}">Challenge</small>
+                                        <small class="text-white" th:text="${participation.progressCount} + '/' + ${participation.requiredCount}">0/5</small>
+                                    </div>
+                                    <div class="progress mb-2" style="height: 6px;">
+                                        <div class="progress-bar bg-primary" 
+                                             th:style="'width: ' + ${participation.progressCount * 100 / participation.requiredCount} + '%'"
+                                             style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- No Active Challenges -->
+                            <div th:if="${#lists.isEmpty(userActiveChallenges)}" class="text-center mb-3">
+                                <small class="text-white">No active challenges</small>
+                            </div>
 
-                             <!-- Challenge Action Buttons -->
-                             <div class="d-grid gap-2">
-                                 <a href="/leaderboard" class="btn btn-outline-secondary btn-sm">
-                                     <i class="bi bi-trophy me-2"></i> Leaderboard
-                                 </a>
-                                 <a href="/challenges" class="btn btn-outline-secondary btn-sm">
-                                     <i class="bi bi-list-ul me-2"></i> View All Challenges
-                                 </a>
-                             </div>
+                            <!-- Challenge Action Buttons -->
+                            <div class="d-grid gap-2">
+                                <a href="/challenges" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-list-ul me-2"></i> View All Challenges
+                                </a>
+                            </div>
                         </div>
                     </div>
 
