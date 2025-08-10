@@ -23,15 +23,7 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                withMaven(maven: 'maven') {
-                    sh "mvn test:test"
-                }
-            }
-        }
-
-        stage('Package'){
+        stage('Test and Package'){
             steps {
                 withMaven(maven: 'maven') {
                     sh 'mvn package'

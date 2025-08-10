@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTests {
+public class UserServiceTest {
 
     @Mock
     public UserRepository userRepository;
