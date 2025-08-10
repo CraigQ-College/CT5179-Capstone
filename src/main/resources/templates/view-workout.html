@@ -2,89 +2,271 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>View Workout</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <!-- Bootstrap Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <title>View Workout - VFC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="/assets/styles/style.css" rel="stylesheet">
   <style>
-    .workout-details {
-        margin: 20px;
+    .btn-link.active {
+        color: #6EACDA !important;
+        font-weight: 600;
     }
-    .workout-details p {
-        font-size: 16px;
+    .btn-link:hover {
+        color: #6EACDA !important;
+        text-decoration: none;
     }
-    table {
-        margin-top: 20px;
+    .hover-bg-light:hover {
+        background-color: #2d2d2d !important;
+    }
+    .user-stats-item:hover {
+        background-color: #2d2d2d !important;
+    }
+    .feed-post {
+        background-color: #212529;
+        border-color: #495057;
+    }
+    .feed-post .card-header {
+        background-color: #2d2d2d;
+        color: #ffffff;
+        border-color: #495057;
+    }
+    .feed-post .card-body {
+        background-color: #212529;
+        color: #ffffff;
+    }
+    .feed-post .card-footer {
+        background-color: #212529;
+        color: #ffffff;
+        border-color: #495057;
+    }
+    .workout-table {
+        background-color: #2d2d2d !important;
+        border: 1px solid #495057;
+    }
+    .workout-table th {
+        background-color: #495057 !important;
+        color: #ffffff !important;
+        border-bottom: 1px solid #6EACDA;
+    }
+    .workout-table td {
+        background-color: #2d2d2d !important;
+        color: #ffffff !important;
+        border-bottom: 1px solid #343a40;
+    }
+    .workout-table tbody tr:nth-child(odd) td {
+        background-color: #2d2d2d !important;
+    }
+    .workout-table tbody tr:nth-child(even) td {
+        background-color: #262626 !important;
+    }
+    .workout-table tr:hover td {
+        background-color: #343a40 !important;
+    }
+    .tribe {
+        background-color: #212529;
+        border-color: #495057;
+        color: #ffffff;
+    }
+    .tribe a {
+        color: #6EACDA;
+    }
+    .tribe a:hover {
+        color: #ffffff;
     }
   </style>
 </head>
-<body class="bg-light">
-<div class="container workout-details">
-  <h2>Workout Details</h2>
-  <div th:if="${workout != null}">
-    <p><strong>Workout ID:</strong> <span th:text="${workout.workoutId}"></span></p>
-    <p><strong>User ID:</strong> <span th:text="${workout.userId}"></span></p>
-    <p><strong>Workout Date:</strong> <span th:text="${workout.workoutDate}"></span></p>
-
-
-    <!-- Cardio Workouts Section -->
-    <h3>Cardio Exercises</h3>
-    <table th:if="${#lists.size(workout.workoutExercises.?[exerciseType == 'CARDIO']) > 0}" class="table table-bordered table-striped">
-      <thead class="table-light">
-      <tr>
-        <th>Exercise Name</th>
-        <th>Duration (min)</th>
-        <th>Distance (km)</th>
-        <th>Calories Burned</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr th:each="exercise : ${workout.workoutExercises}" th:if="${exercise.exerciseType == 'CARDIO'}">
-        <td th:text="${exercise.cardioExerciseName} ?: '-'"></td>
-        <td th:text="${exercise.durationMinutes} ?: '-'"></td>
-        <td th:text="${exercise.distance} ?: '-'"></td>
-        <td th:text="${exercise.caloriesBurned} ?: '-'"></td>
-      </tr>
-      </tbody>
-    </table>
-    <p th:if="${#lists.size(workout.workoutExercises.?[exerciseType == 'CARDIO']) == 0}" class="text-muted">
-      No cardio exercises recorded for this workout.
-    </p>
-
-    <!-- Weight Workouts Section -->
-    <h3>Weight Exercises</h3>
-    <table th:if="${#lists.size(workout.workoutExercises.?[exerciseType == 'WEIGHT']) > 0}" class="table table-bordered table-striped">
-      <thead class="table-light">
-      <tr>
-        <th>Exercise Name</th>
-        <th>Set Number</th>
-        <th>Reps</th>
-        <th>Weight (kg)</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr th:each="exercise : ${workout.workoutExercises}" th:if="${exercise.exerciseType == 'WEIGHT'}">
-        <td th:text="${exercise.weightExerciseName} ?: '-'"></td>
-        <td th:text="${exercise.setNumber} ?: '-'"></td>
-        <td th:text="${exercise.reps} ?: '-'"></td>
-        <td th:text="${exercise.weight} ?: '-'"></td>
-      </tr>
-      </tbody>
-    </table>
-    <p th:if="${#lists.size(workout.workoutExercises.?[exerciseType == 'WEIGHT']) == 0}" class="text-muted">
-      No weight exercises recorded for this workout.
-    </p>
+<body class="bg-dark text-light">
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/users/dashboard}">
+      <img src="/assets/images/logo.png" alt="VFC Logo" height="30">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link active" th:href="@{/users/dashboard}"><i class="bi bi-house-door"></i> Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/workouts/addWorkout(userId=${user.userId})}"><i class="bi bi-plus-circle"></i> Log Workout</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/meals/addMeal(userId=${user.userId})}"><i class="bi bi-cup-hot"></i> Log Meal</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/posts/add-post}"><i class="bi bi-house-door"></i> Post Message</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/users/friends(tab='pending')}"><i class="bi bi-people"></i> Friend Requests</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/users/friends(tab='find-friends')}"><i class="bi bi-search"></i> Find Friends</a>
+        </li>
+      </ul>
+      <div class="navbar-nav">
+        <div class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle"></i> <span th:text="${user.userName}">User</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark">
+            <li><a class="dropdown-item" th:href="@{/users/users/{id}(id=${user.userId})}"><i class="bi bi-person"></i> Profile</a></li>
+            <li><a class="dropdown-item" th:href="@{/users/pending}"><i class="bi bi-people"></i> Friend Requests</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" th:href="@{/users/logout}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
-  <div th:if="${workout == null}" class="alert alert-warning">
-    <p>Workout not found.</p>
+</nav>
+
+<!-- Main Content - Three Column Layout -->
+<div class="container-fluid py-4">
+  <div class="row">
+    <!-- Left Sidebar - Navigation -->
+    <div class="col-lg-3 col-md-4 mb-4">
+      <div class="sticky-top" style="top: 20px;">
+        <div class="card bg-dark border-secondary mb-4">
+          <div class="card-body">
+            <h6 class="text-white mb-3">Navigation</h6>
+            <div class="d-flex flex-column gap-3">
+              <a th:href="@{/users/dashboard}" class="btn btn-link text-white text-start p-0 border-0">
+                <i class="bi bi-house-door me-2"></i>My Dashboard
+              </a>
+              <a th:href="@{/posts/listFeed}" class="btn btn-link text-white text-start p-0 border-0">
+                <i class="bi bi-house-door me-2"></i>My Newsfeed
+              </a>
+              <a th:href="@{/posts/listPosts}" class="btn btn-link text-white text-start p-0 border-0">
+                <i class="bi bi-file-post me-2"></i>My Posts
+              </a>
+              <a th:href="@{/meals/listMeals}" class="btn btn-link text-white text-start p-0 border-0">
+                <i class="bi bi-cup-hot me-2"></i>My Meals
+              </a>
+              <a th:href="@{/workouts/listWorkouts}" class="btn btn-link text-white text-start p-0 border-0 active">
+                <i class="bi bi-plus-circle me-2"></i>My Workouts
+              </a>
+              <a th:href="@{/users/friends/{id}(id=${user.userId})}" class="btn btn-link text-white text-start p-0 border-0">
+                <i class="bi bi-person-plus me-2"></i>My Friends
+              </a>
+              <br>
+              <a th:href="@{/users/logout}" class="btn btn-link text-white text-start p-0 border-0">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-6 col-md-8">
+      <h2 class="text-white mb-4">View Workout</h2>
+      <p class="text-muted" th:text="'Logged by: ' + ${user.userName}"></p>
+
+      <!-- Workout Summary Card -->
+      <div class="card bg-dark border-secondary mb-4 feed-post" th:if="${workout != null}">
+        <div class="card-header d-flex align-items-center">
+          <img src="/assets/images/logo.png" alt="User Avatar" class="img-fluid me-3" style="max-width: 40px; max-height: 40px;">
+          <div>
+            <h6 class="mb-0 text-white" th:text="${user.userName}">User Name</h6>
+            <small class="text-white" th:text="${#temporals.format(workout.workoutDate, 'MMM dd, yyyy HH:mm')}">Date</small>
+          </div>
+        </div>
+        <div class="card-body">
+          <h6 class="card-title">
+            <i class="bi bi-plus-circle text-success"></i>
+            <span th:text="${workout.notes ?: 'Workout'}">Workout</span>
+          </h6>
+          <p><strong>Workout ID:</strong> <span th:text="${workout.workoutId}"></span></p>
+          <h5>Exercises</h5>
+          <!-- Cardio Exercises Table -->
+          <h6>Cardio Exercises</h6>
+          <table th:if="${#lists.size(workout.workoutExercises.?[exerciseType == 'CARDIO']) > 0}" class="table workout-table">
+            <thead>
+            <tr>
+              <th>Exercise Name</th>
+              <th>Duration (min)</th>
+              <th>Distance (km)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="exercise : ${workout.workoutExercises}" th:if="${exercise.exerciseType == 'CARDIO'}">
+              <td th:text="${exercise.cardioExerciseName ?: '-'}"></td>
+              <td th:text="${exercise.durationMinutes ?: '-'}"></td>
+              <td th:text="${exercise.distance ?: '-'}"></td>
+            </tr>
+            </tbody>
+          </table>
+          <div th:if="${#lists.size(workout.workoutExercises.?[exerciseType == 'CARDIO']) == 0}">
+            <p class="text-muted">No cardio exercises logged for this workout.</p>
+          </div>
+          <!-- Weight Exercises Table -->
+          <h6>Weight Exercises</h6>
+          <table th:if="${#lists.size(workout.workoutExercises.?[exerciseType == 'WEIGHT']) > 0}" class="table workout-table">
+            <thead>
+            <tr>
+              <th>Exercise Name</th>
+              <th>Set Number</th>
+              <th>Reps</th>
+              <th>Weight (kg)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="exercise : ${workout.workoutExercises}" th:if="${exercise.exerciseType == 'WEIGHT'}">
+              <td th:text="${exercise.weightExerciseName ?: '-'}"></td>
+              <td th:text="${exercise.setNumber ?: '-'}"></td>
+              <td th:text="${exercise.reps ?: '-'}"></td>
+              <td th:text="${exercise.weight ?: '-'}"></td>
+            </tr>
+            </tbody>
+          </table>
+          <div th:if="${#lists.size(workout.workoutExercises.?[exerciseType == 'WEIGHT']) == 0}">
+            <p class="text-muted">No weight exercises logged for this workout.</p>
+          </div>
+        </div>
+        <!--<div class="card-footer">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <a th:href="@{/workouts/listWorkouts(userId=${workout.userId})}" class="btn btn-sm btn-primary">View All Workouts</a>
+            </div>
+          </div>
+        </div>-->
+      </div>
+      <div th:if="${workout == null}" class="card bg-dark border-secondary text-center py-5">
+        <div class="card-body">
+          <i class="bi bi-exclamation-triangle display-1 text-warning mb-3"></i>
+          <h5 class="text-white">Workout Not Found</h5>
+          <p class="text-white">The requested workout could not be found.</p>
+          <a th:href="@{/workouts/listWorkouts(userId=${user.userId})}" class="btn btn-primary">View All Workouts</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar - Tribe -->
+    <div class="col-lg-3 d-none d-lg-block">
+      <div class="sticky-top" style="top: 20px;">
+        <div class="tribe card bg-dark border-secondary mb-4">
+          <div class="card-header">
+            <h6 class="mb-0 text-white"><span th:text="${user.userName}"></span>'s Tribe</h6>
+          </div>
+          <div class="card-body">
+            <div th:each="friend : ${friends}">
+              <a th:href="@{/users/dashboard2/{id}(id=${friend.userId})}" th:text="${friend.userName}" class="d-block mb-2"></a>
+            </div>
+            <div th:if="${#lists.isEmpty(friends)}">
+              <p class="mb-0 text-white">No friends found.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <a th:href="@{/workouts(userId=${workout.userId})}" class="btn btn-primary">View Workouts</a>
 </div>
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 </body>
 </html>

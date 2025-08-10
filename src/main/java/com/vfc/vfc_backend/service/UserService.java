@@ -1,5 +1,6 @@
 package com.vfc.vfc_backend.service;
 
+import com.vfc.vfc_backend.model.FriendRequestStatus;
 import com.vfc.vfc_backend.model.User;
 import org.springframework.stereotype.Service;
 
@@ -18,4 +19,10 @@ public interface UserService {
     User findByUsername(String username);
 
     User findByUseremail(String email);
+
+    List<User> findNonFriends(int userId, FriendRequestStatus status);
+
+    long countNonFriends(int userId, FriendRequestStatus status);
+
+    List<User> findNonFriends(int userId, FriendRequestStatus status, int page, int pageSize);
 }

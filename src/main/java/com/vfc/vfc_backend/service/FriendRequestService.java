@@ -52,7 +52,9 @@ public class FriendRequestService {
         // Create and save friend request
         FriendRequest request = new FriendRequest();
         request.setSender(sender);
-        request.setReceiver(receiver);
+       request.setReceiver(receiver);
+        //request.setSenderId(senderId);
+         //request.setReceiverId(receiverId);
         request.setStatus(FriendRequestStatus.PENDING);
         request.setCreatedAt(LocalDateTime.now());
         request.setUpdatedAt(LocalDateTime.now());
@@ -76,6 +78,9 @@ public class FriendRequestService {
         friendRequestRepository.save(request);
 
         // Create friendship
+        //int userId1 = Math.min(request.getSenderId(), request.getReceiverId());
+        //int userId2 = Math.max(request.getSenderId(), request.getReceiverId());
+
         int userId1 = Math.min(request.getSender().getUserId(), request.getReceiver().getUserId());
         int userId2 = Math.max(request.getSender().getUserId(), request.getReceiver().getUserId());
         Friendship friendship = new Friendship(userId1, userId2);

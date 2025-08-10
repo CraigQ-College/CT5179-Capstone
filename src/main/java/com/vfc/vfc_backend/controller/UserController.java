@@ -2,9 +2,7 @@ package com.vfc.vfc_backend.controller;
 
 import com.vfc.vfc_backend.model.*;
 import com.vfc.vfc_backend.repository.FriendRequestRepository;
-import com.vfc.vfc_backend.service.FriendService;
-import com.vfc.vfc_backend.service.MealService;
-import com.vfc.vfc_backend.service.WorkoutService;
+import com.vfc.vfc_backend.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vfc.vfc_backend.service.UserService;
@@ -28,14 +26,16 @@ public class UserController {
 
     private WorkoutService workoutService;
     private MealService mealService;
+    private PostService postService;
 
 
 
-    public UserController(UserService theUserService, FriendService friendService,WorkoutService workoutService,MealService mealService) {
+    public UserController(UserService theUserService, FriendService friendService,WorkoutService workoutService,MealService mealService,PostService postService) {
         this.userService = theUserService;
         this.friendService = friendService;
         this.workoutService =workoutService;
         this.mealService =mealService;
+        this.postService = postService;
     }
 
     @GetMapping("/register")
@@ -75,6 +75,66 @@ public class UserController {
         }
     }
 
+    @GetMapping("/list/{userId}")
+    public String listWorkoutsAndMeals(
+            @PathVariable("userId") int userId,
+            @RequestParam(defaultValue = "1") int workoutPage,
+            @RequestParam(defaultValue = "1") int mealPage,
+            HttpSession session, Model model) {
+
+        // Optional: Verify user authorization (e.g., check if session user matches userId)
+        User sessionUser = (User) session.getAttribute("user");
+        if (sessionUser == null || sessionUser.getUserId() != userId) {
+            return "redirect:/users/login"; // Or handle unauthorized access differently
+        }
+
+        int pageSize = 10;
+
+        // Workouts
+        List<Workout> workouts = workoutService.getWorkoutsByUserId(userId, workoutPage, pageSize);
+        long totalWorkouts = workoutService.countWorkoutsByUserId(userId);
+        int totalWorkoutPages = (int) Math.ceil((double) totalWorkouts / pageSize);
+
+        // Meals
+        List<Meal> meals = mealService.getMealsByUserId(userId, mealPage, pageSize);
+        long totalMeals = mealService.countMealsByUserId(userId);
+        int totalMealPages = (int) Math.ceil((double) totalMeals / pageSize);
+
+        // Add to model
+        model.addAttribute("workouts", workouts);
+        model.addAttribute("meals", meals);
+        model.addAttribute("userId", userId);
+        model.addAttribute("userName", sessionUser.getUserName());
+        model.addAttribute("currentWorkoutPage", workoutPage);
+        model.addAttribute("totalWorkoutPages", totalWorkoutPages);
+        model.addAttribute("currentMealPage", mealPage);
+        model.addAttribute("totalMealPages", totalMealPages);
+
+        return "workouts-meals"; // Thymeleaf template name
+    }
+/*
+    @PostMapping("/users")
+    public String listUsers(@ModelAttribute("user") User theUser, Model model) {
+        //model.addAttribute("user", new User());
+        int currentUserId = theUser.getUserId();
+        List<User> users = userService.findAll();
+
+        /*
+        // Create a map to store whether a friend request can be sent for each user
+        Map<Integer, Boolean> canSendFriendRequest = new HashMap<>();
+        for (User user : users) {
+            boolean canSend = user.getUserId() != currentUserId &&
+                    !friendService.isFriend(currentUserId, user.getUserId()) &&
+                    friendRequestRepository.findBySenderAndReceiver(
+                            userRepository.findById(currentUserId).orElse(null), user
+                    ).isEmpty();
+            canSendFriendRequest.put(user.getUserId(), canSend);
+        }
+        model.addAttribute("users", users);
+        model.addAttribute("currentUserId", currentUserId);
+        return "user-list";
+    }*/
+/*
     @PostMapping("/users")
     public String listUsers(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
@@ -99,6 +159,42 @@ public class UserController {
         model.addAttribute("isFriendMap", isFriendMap);
         model.addAttribute("userForm", new User());
         return "user-list";
+    }*/
+
+    /*
+    @GetMapping("/users")
+    public String listUsers(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+
+        // Get all users
+        List<User> allUsers = userService.findAll();
+        if (allUsers == null) {
+            allUsers = Collections.emptyList();
+        }
+
+        // Get the current user's friends
+        List<User> filteredUsers = userService.findNonFriends(user.getUserId(), FriendRequestStatus.PENDING);
+        if (filteredUsers == null) {
+            filteredUsers = Collections.emptyList();
+        }
+
+
+        model.addAttribute("users", filteredUsers);
+        model.addAttribute("currentUserId", user.getUserId());
+        //model.addAttribute("isFriendMap", isFriendMap);
+        model.addAttribute("userForm", new User());
+        return "user-list";
+    }*/
+    @GetMapping("/users")
+    public String redirectFindFriends(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+        return "redirect:/users/friends/" + user.getUserId() + "?tab=find-friends";
     }
 
     @GetMapping("/users/{id}")
@@ -142,13 +238,13 @@ public class UserController {
         }
 
     }
-
+    /*
     @GetMapping("/users/pending")
     //public String listPendingRequests(@ModelAttribute("user") User theUser,HttpSession session,Model model) {
     public String showPendingRequests(HttpSession session,Model model) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            return "redirect:/login";
+            return "redirect:/users/login";
         }
         try {
             List<FriendRequest> pendingRequests = friendService.getPendingRequests(user.getUserId());
@@ -156,7 +252,7 @@ public class UserController {
                 User sender = userService.findById(request.getSenderId());
                 //request.setSenderName(sender != null ? sender.getUserName() : "Unknown");
                 //request.setSenderEmail(sender != null ? sender.getUserEmail() : "Unknown");
-            }*/
+            }
             model.addAttribute("pendingRequests", pendingRequests);
             model.addAttribute("currentUserId", user.getUserId());
             return "pending-requests";
@@ -169,13 +265,13 @@ public class UserController {
         //List<FriendRequest> pendingRequests = friendService.getPendingRequests(currentUserId);
         //model.addAttribute("pendingRequests", pendingRequests);
         //return "pending-requests";
-    }
-
+    }*/
+/*
     @PostMapping("/pending")
     public String listPendingRequests(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            return "redirect:/login";
+            return "redirect:/users/login";
         }
         try {
             List<FriendRequest> pendingRequests = friendService.getPendingRequests(user.getUserId());
@@ -186,35 +282,9 @@ public class UserController {
             model.addAttribute("error", ex.getMessage());
             return "error";
         }
-    }
+    }*/
 
-    @PostMapping("/requests/{requestId}/accept")
-    public String acceptFriendRequest(@PathVariable("requestId") int requestId) {
-        friendService.acceptFriendRequest(requestId);
-        return "redirect:/requests/pending";
-    }
 
-    @GetMapping("/friends")
-    public String listFriends(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return "redirect:/users/login";
-        }
-        
-        int currentUserId = user.getUserId();
-        List<User> friends = friendService.getFriends(currentUserId);
-        model.addAttribute("friends", friends);
-        model.addAttribute("user", user);
-        return "friends-list";
-    }
-
-    @PostMapping("/friends")
-    public String listFriendsPost(@ModelAttribute("user") User theUser, Model model) {
-        int currentUserId = theUser.getUserId();
-        List<User> friends = friendService.getFriends(currentUserId);
-        model.addAttribute("friends", friends);
-        return "friends-list";
-    }
 
     @GetMapping("/")
     public String redirectToLogin() {
@@ -237,6 +307,7 @@ public class UserController {
         if (existingUser != null && BCrypt.checkpw(user.getUserPassword(), existingUser.getUserPassword())){
             session.setAttribute("user", existingUser);
             return "redirect:/users/dashboard";
+
         } else {
             // Invalid credentials, add error message and return to login page
             theModel.addAttribute("error", "Invalid username or password");
@@ -245,7 +316,80 @@ public class UserController {
     }
 
     @GetMapping("/dashboard")
-    public String showDashboard(HttpSession session, Model model) {
+    public String showDashboard( @RequestParam(defaultValue = "1") int workoutPage,
+                                @RequestParam(defaultValue = "1") int mealPage,@RequestParam(defaultValue = "1") int postPage,HttpSession session, Model model){
+
+
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+
+        int userId = user.getUserId();
+        int pageSize = 5;
+
+
+
+        //Posts
+        List<Post> posts = postService.getPostsByUserId(userId, postPage, pageSize);
+        long totalPosts = postService.countPostsByUserId(userId);
+        int totalPostPages = (int) Math.ceil((double) totalPosts / pageSize);
+        model.addAttribute("posts",posts);
+        model.addAttribute("currentPostPage", postPage);
+        model.addAttribute("totalPostPages", totalPostPages);
+
+        // Workouts
+        List<Workout> workouts = workoutService.getWorkoutsByUserId(userId, workoutPage, pageSize);
+        long totalWorkouts = workoutService.countWorkoutsByUserId(userId);
+        int totalWorkoutPages = (int) Math.ceil((double) totalWorkouts / pageSize);
+        model.addAttribute("workouts", workouts);
+        model.addAttribute("currentWorkoutPage", workoutPage);
+        model.addAttribute("totalWorkoutPages", totalWorkoutPages);
+
+        // Meals
+        List<Meal> meals = mealService.getMealsByUserId(userId, mealPage, pageSize);
+        long totalMeals = mealService.countMealsByUserId(userId);
+        int totalMealPages = (int) Math.ceil((double) totalMeals / pageSize);
+        model.addAttribute("meals", meals);
+        model.addAttribute("currentMealPage", mealPage);
+        model.addAttribute("totalMealPages", totalMealPages);
+
+        long mealCount = mealService.getWeeklyMealCount(userId);
+        model.addAttribute("weeklyMeals", mealCount);
+
+        long workoutCount = workoutService.getWeeklyWorkoutCount(userId);
+        model.addAttribute("weeklyWorkouts", workoutCount);
+
+
+        long postCount = postService.getWeeklyPostCount(userId);
+        model.addAttribute("weeklyPosts", postCount);
+
+        double totalCalories = mealService.getTodaysCalories(userId);
+        model.addAttribute("todayCalories", totalCalories);
+
+
+        String name = userService.findById(userId).getUserName();
+
+        model.addAttribute("user", user);
+        model.addAttribute("userId", userId);
+        model.addAttribute("userName", name);
+        //model.addAttribute("userName", sessionUser.getUserName());
+
+        List<User> friends = friendService.getFriends(userId);
+        model.addAttribute("friends", friends);
+
+        List<FriendRequest> pendingRequests = friendService.getPendingRequests(userId);
+        model.addAttribute("pendingRequests", pendingRequests);
+        model.addAttribute("pendingRequestsCount", pendingRequests.size());
+
+        //return "test2";
+        return "dashboard";
+    }
+
+    @GetMapping("/dashboard2")
+    public String showDashboard2( @RequestParam(defaultValue = "1") int workoutPage,
+                                 @RequestParam(defaultValue = "1") int mealPage,@RequestParam(defaultValue = "1") int postPage,HttpSession session, Model model){
+        /*
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/login";
@@ -255,10 +399,8 @@ public class UserController {
 
         // Fetch the last 3 workouts
         List<Workout> lastThreeWorkouts = workoutService.getLastThreeWorkoutsByUserId(userId);
-
         // Fetch the last 3 meals
         List<Meal> lastThreeMeals = mealService.getLastThreeMealsByUserId(userId);
-
         // Fetch last 3 friendships
         List<Friendship> lastThreeFriendships = friendService.getLastThreeFriendshipsByUserId(userId);
 
@@ -285,12 +427,396 @@ public class UserController {
         model.addAttribute("currentStreak", 0);
         model.addAttribute("recentWorkouts", Collections.emptyList());
         model.addAttribute("activeChallengesList", Collections.emptyList());
-        return "dashboard";
+        return "dashboard";*/
+
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+
+        int userId = user.getUserId();
+        int pageSize = 10;
+
+        // Workouts
+        List<Post> posts = postService.getPostsByUserId(userId, postPage, pageSize);
+        long totalPosts = postService.countPostsByUserId(userId);
+        int totalPostPages = (int) Math.ceil((double) totalPosts / pageSize);
+
+        // Workouts
+        List<Workout> workouts = workoutService.getWorkoutsByUserId(userId, workoutPage, pageSize);
+        long totalWorkouts = workoutService.countWorkoutsByUserId(userId);
+        int totalWorkoutPages = (int) Math.ceil((double) totalWorkouts / pageSize);
+
+        // Meals
+        List<Meal> meals = mealService.getMealsByUserId(userId, mealPage, pageSize);
+        long totalMeals = mealService.countMealsByUserId(userId);
+        int totalMealPages = (int) Math.ceil((double) totalMeals / pageSize);
+
+        List<FriendRequest> pendingRequests = friendService.getPendingRequests(userId);
+
+        String name = userService.findById(userId).getUserName();
+        // Add to model
+        model.addAttribute("workouts", workouts);
+        model.addAttribute("meals", meals);
+        model.addAttribute("posts",posts);
+        model.addAttribute("userId", userId);
+        //model.addAttribute("userName", sessionUser.getUserName());
+
+        model.addAttribute("currentPostPage", postPage);
+        model.addAttribute("totalPostPages", totalPostPages);
+
+        model.addAttribute("currentWorkoutPage", workoutPage);
+        model.addAttribute("totalWorkoutPages", totalWorkoutPages);
+        model.addAttribute("currentMealPage", mealPage);
+        model.addAttribute("totalMealPages", totalMealPages);
+
+
+
+        List<User> friends = friendService.getFriends(userId);
+        model.addAttribute("friends", friends);
+        model.addAttribute("user", user);
+        model.addAttribute("userName", name);
+
+        model.addAttribute("pendingRequests", pendingRequests);
+        model.addAttribute("pendingRequestsCount", pendingRequests.size());
+
+        return "test2";
+        //return "dashboard";
+    }
+
+
+
+    @GetMapping("/dashboard/{id}")
+    public String showDashboardForUser(@PathVariable("id") int userId , @RequestParam(defaultValue = "1") int workoutPage,
+                                       @RequestParam(defaultValue = "1") int mealPage,@RequestParam(defaultValue = "1") int postPage,HttpSession session, Model model) {
+
+
+
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return "redirect:/users/login";
+            }
+
+            User viewUser = userService.findById(userId);
+            String viewUserName = viewUser.getUserName();
+            //int userId = user.getUserId();
+            int pageSize = 5;
+
+
+
+            //Posts
+            List<Post> posts = postService.getPostsByUserId(userId, postPage, pageSize);
+            long totalPosts = postService.countPostsByUserId(userId);
+            int totalPostPages = (int) Math.ceil((double) totalPosts / pageSize);
+            model.addAttribute("posts",posts);
+            model.addAttribute("currentPostPage", postPage);
+            model.addAttribute("totalPostPages", totalPostPages);
+
+            // Workouts
+            List<Workout> workouts = workoutService.getWorkoutsByUserId(userId, workoutPage, pageSize);
+            long totalWorkouts = workoutService.countWorkoutsByUserId(userId);
+            int totalWorkoutPages = (int) Math.ceil((double) totalWorkouts / pageSize);
+            model.addAttribute("workouts", workouts);
+            model.addAttribute("currentWorkoutPage", workoutPage);
+            model.addAttribute("totalWorkoutPages", totalWorkoutPages);
+
+            // Meals
+            List<Meal> meals = mealService.getMealsByUserId(userId, mealPage, pageSize);
+            long totalMeals = mealService.countMealsByUserId(userId);
+            int totalMealPages = (int) Math.ceil((double) totalMeals / pageSize);
+            model.addAttribute("meals", meals);
+            model.addAttribute("currentMealPage", mealPage);
+            model.addAttribute("totalMealPages", totalMealPages);
+
+            long mealCount = mealService.getWeeklyMealCount(userId);
+            model.addAttribute("weeklyMeals", mealCount);
+
+            long workoutCount = workoutService.getWeeklyWorkoutCount(userId);
+            model.addAttribute("weeklyWorkouts", workoutCount);
+
+
+            long postCount = postService.getWeeklyPostCount(userId);
+            model.addAttribute("weeklyPosts", postCount);
+
+            double totalCalories = mealService.getTodaysCalories(userId);
+            model.addAttribute("todayCalories", totalCalories);
+
+
+            String name = userService.findById(userId).getUserName();
+
+            model.addAttribute("user", viewUser);
+            model.addAttribute("userId", userId);
+            model.addAttribute("userName", viewUserName);
+
+
+            List<User> friends = friendService.getFriends(userId);
+            model.addAttribute("friends", friends);
+
+            List<FriendRequest> pendingRequests = friendService.getPendingRequests(userId);
+            //model.addAttribute("pendingRequests", pendingRequests);
+            //model.addAttribute("pendingRequestsCount", pendingRequests.size());
+
+            //return "test2";
+            return "dashboard";
+        }
+
+    @GetMapping("/dashboard2/{id}")
+    public String showDashboard2ForUser(@PathVariable("id") int userId , @RequestParam(defaultValue = "1") int workoutPage,
+    @RequestParam(defaultValue = "1") int mealPage,@RequestParam(defaultValue = "1") int postPage,HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+
+            int pageSize = 10;
+
+        // Workouts
+            List<Post> posts = postService.getPostsByUserId(userId, postPage, pageSize);
+            long totalPosts = postService.countPostsByUserId(userId);
+            int totalPostPages = (int) Math.ceil((double) totalPosts / pageSize);
+
+            // Workouts
+            List<Workout> workouts = workoutService.getWorkoutsByUserId(userId, workoutPage, pageSize);
+            long totalWorkouts = workoutService.countWorkoutsByUserId(userId);
+            int totalWorkoutPages = (int) Math.ceil((double) totalWorkouts / pageSize);
+
+            // Meals
+            List<Meal> meals = mealService.getMealsByUserId(userId, mealPage, pageSize);
+            long totalMeals = mealService.countMealsByUserId(userId);
+            int totalMealPages = (int) Math.ceil((double) totalMeals / pageSize);
+
+            String name = userService.findById(userId).getUserName();
+            // Add to model
+            model.addAttribute("workouts", workouts);
+            model.addAttribute("meals", meals);
+            model.addAttribute("posts",posts);
+            model.addAttribute("userId", userId);
+            //model.addAttribute("userName", sessionUser.getUserName());
+
+            model.addAttribute("currentPostPage", postPage);
+            model.addAttribute("totalPostPages", totalPostPages);
+
+            model.addAttribute("currentWorkoutPage", workoutPage);
+            model.addAttribute("totalWorkoutPages", totalWorkoutPages);
+            model.addAttribute("currentMealPage", mealPage);
+            model.addAttribute("totalMealPages", totalMealPages);
+
+
+
+        List<User> friends = friendService.getFriends(userId);
+        model.addAttribute("friends", friends);
+        model.addAttribute("user", user);
+        model.addAttribute("userName", name);
+
+        return "test2";
     }
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login";
+        return "redirect:/users/login";
+    }
+
+    /*
+    @PostMapping("/requests/{requestId}/accept")
+    public String acceptFriendRequest(@PathVariable("requestId") int requestId) {
+        friendService.acceptFriendRequest(requestId);
+        return "redirect:/requests/pending";
+    }*/
+
+    @GetMapping("/friends")
+    public String listFriends(
+        //@PathVariable("id") int userId,
+        @RequestParam(defaultValue = "1") int friendPage,
+        @RequestParam(defaultValue = "1") int pendingPage,
+        @RequestParam(defaultValue = "1") int findFriendsPage,
+        @RequestParam(defaultValue = "friends") String tab,
+        HttpSession session, Model model) {
+
+            // Verify user authorization
+            User user = (User) session.getAttribute("user");
+            int userId = user.getUserId();
+            if (user == null || user.getUserId() != userId) {
+                return "redirect:/users/login";
+            }
+
+            int pageSize = 10;
+
+            // Friends
+            List<User> friends = friendService.getFriends(userId, friendPage, pageSize);
+            long totalFriends = friendService.countFriends(userId);
+            int totalFriendPages = (int) Math.ceil((double) totalFriends / pageSize);
+
+            // Pending Friend Requests
+            List<FriendRequest> pendingRequests = friendService.getPendingRequests(userId, pendingPage, pageSize);
+            long totalPendingRequests = friendService.countPendingRequests(userId);
+            int totalPendingPages = (int) Math.ceil((double) totalPendingRequests / pageSize);
+
+            // Non-Friends (Find Friends)
+            List<User> nonFriends = userService.findNonFriends(userId, FriendRequestStatus.PENDING, findFriendsPage, pageSize);
+            long totalNonFriends = userService.countNonFriends(userId, FriendRequestStatus.PENDING);
+            int totalFindFriendsPages = (int) Math.ceil((double) totalNonFriends / pageSize);
+
+            // Add to model
+            model.addAttribute("friends", friends);
+            model.addAttribute("pendingRequests", pendingRequests);
+            model.addAttribute("nonFriends", nonFriends);
+            model.addAttribute("userId", userId);
+            model.addAttribute("user", user);
+            model.addAttribute("userName", user.getUserName());
+            model.addAttribute("currentFriendPage", friendPage);
+            model.addAttribute("totalFriendPages", totalFriendPages);
+            model.addAttribute("currentPendingPage", pendingPage);
+            model.addAttribute("totalPendingPages", totalPendingPages);
+            model.addAttribute("currentFindFriendsPage", findFriendsPage);
+            model.addAttribute("totalFindFriendsPages", totalFindFriendsPages);
+            model.addAttribute("activeTab", tab);
+
+            return "friends"; // New Thymeleaf template name
+        }
+
+    @PostMapping("/friends")
+    public String listFriendsPost(@ModelAttribute("user") User theUser, Model model) {
+        int currentUserId = theUser.getUserId();
+        List<User> friends = friendService.getFriends(currentUserId);
+        model.addAttribute("friends", friends);
+        return "friends-list";
+    }
+
+    /*
+    @PostMapping("/friends")
+    public String listFriends(@ModelAttribute("user") User theUser,Model model) {
+        int currentUserId = theUser.getUserId();
+        List<User> friends = friendService.getFriends(currentUserId);
+        model.addAttribute("friends", friends);
+        return "friends-list";
+    }*/
+
+    @GetMapping("/friends/{id}")
+    public String listFriendsAndRequests(
+            @PathVariable("id") int userId,
+            @RequestParam(defaultValue = "1") int friendPage,
+            @RequestParam(defaultValue = "1") int pendingPage,
+            @RequestParam(defaultValue = "1") int findFriendsPage,
+            @RequestParam(defaultValue = "friends") String tab,
+            HttpSession session, Model model) {
+
+        // Verify user authorization
+        User user = (User) session.getAttribute("user");
+        if (user == null || user.getUserId() != userId) {
+            return "redirect:/users/login";
+        }
+
+        int pageSize = 10;
+
+        // Friends
+        List<User> friends = friendService.getFriends(userId, friendPage, pageSize);
+        long totalFriends = friendService.countFriends(userId);
+        int totalFriendPages = (int) Math.ceil((double) totalFriends / pageSize);
+
+        // Pending Friend Requests
+        List<FriendRequest> pendingRequests = friendService.getPendingRequests(userId, pendingPage, pageSize);
+        long totalPendingRequests = friendService.countPendingRequests(userId);
+        int totalPendingPages = (int) Math.ceil((double) totalPendingRequests / pageSize);
+
+        // Non-Friends (Find Friends)
+        List<User> nonFriends = userService.findNonFriends(userId, FriendRequestStatus.PENDING, findFriendsPage, pageSize);
+        long totalNonFriends = userService.countNonFriends(userId, FriendRequestStatus.PENDING);
+        int totalFindFriendsPages = (int) Math.ceil((double) totalNonFriends / pageSize);
+
+        // Add to model
+        model.addAttribute("friends", friends);
+        model.addAttribute("pendingRequests", pendingRequests);
+        model.addAttribute("nonFriends", nonFriends);
+        model.addAttribute("userId", userId);
+        model.addAttribute("user", user);
+        model.addAttribute("userName", user.getUserName());
+        model.addAttribute("currentFriendPage", friendPage);
+        model.addAttribute("totalFriendPages", totalFriendPages);
+        model.addAttribute("currentPendingPage", pendingPage);
+        model.addAttribute("totalPendingPages", totalPendingPages);
+        model.addAttribute("currentFindFriendsPage", findFriendsPage);
+        model.addAttribute("totalFindFriendsPages", totalFindFriendsPages);
+        model.addAttribute("activeTab", tab);
+
+        return "friends"; // New Thymeleaf template name
+    }
+
+    @PostMapping("/{id}/friend-request")
+    public String sendFriendRequest(HttpSession session, @PathVariable("id") int receiverId, Model model,
+                                    @RequestParam(defaultValue = "1") int friendPage,
+                                    @RequestParam(defaultValue = "1") int pendingPage,
+                                    @RequestParam(defaultValue = "1") int findFriendsPage,
+                                    @RequestParam(defaultValue = "find-friends") String tab) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+        int currentUserId = user.getUserId();
+        try {
+            friendService.sendFriendRequest(currentUserId, receiverId);
+            return "redirect:/users/friends/" + currentUserId + "?friendPage=" + friendPage + "&pendingPage=" + pendingPage + "&findFriendsPage=" + findFriendsPage + "&tab=" + tab;
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            model.addAttribute("error", e.getMessage());
+            return listFriendsAndRequests(currentUserId, friendPage, pendingPage, findFriendsPage, tab,session, model);
+
+        }
+    }
+    @PostMapping("/requests/{id}/accept")
+    public String acceptFriendRequest(@PathVariable("id") int requestId, HttpSession session, Model model,
+                                        @RequestParam(defaultValue = "1") int friendPage,
+                                        @RequestParam(defaultValue = "1") int pendingPage,
+                                        @RequestParam(defaultValue = "1") int findFriendsPage,
+                                        @RequestParam(defaultValue = "pending") String tab) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+        try {
+            friendService.acceptFriendRequest(requestId);
+            return "redirect:/users/friends/" + user.getUserId() + "?friendPage=" + friendPage + "&pendingPage=" + pendingPage + "&findFriendsPage=" + findFriendsPage + "&tab=" + tab;
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            model.addAttribute("error", e.getMessage());
+            return listFriendsAndRequests(user.getUserId(), friendPage, pendingPage, findFriendsPage,tab, session, model);
+        }
+    }
+
+    @PostMapping("/requests/{id}/reject")
+    public String rejectFriendRequest(@PathVariable("id") int requestId, HttpSession session, Model model,
+                                      @RequestParam(defaultValue = "1") int friendPage,
+                                      @RequestParam(defaultValue = "1") int pendingPage,
+                                      @RequestParam(defaultValue = "1") int findFriendsPage,
+                                      @RequestParam(defaultValue = "pending") String tab) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+        try {
+            friendService.rejectFriendRequest(requestId);
+            return "redirect:/users/friends/" + user.getUserId() + "?friendPage=" + friendPage + "&pendingPage=" + pendingPage + "&findFriendsPage=" + findFriendsPage + "&tab=" + tab;
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            model.addAttribute("error", e.getMessage());
+            return listFriendsAndRequests(user.getUserId(), friendPage, pendingPage, findFriendsPage,tab, session, model);
+        }
+    }
+    @PostMapping("/friends/{id}/delete")
+    public String deleteFriend(@PathVariable("id") int friendId, HttpSession session, Model model,
+                               @RequestParam(defaultValue = "1") int friendPage,
+                               @RequestParam(defaultValue = "1") int pendingPage,
+                               @RequestParam(defaultValue = "1") int findFriendsPage,
+                               @RequestParam(defaultValue = "friends") String tab) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+        int currentUserId = user.getUserId();
+        try {
+            friendService.deleteFriend(currentUserId, friendId);
+            return "redirect:/users/friends/" + currentUserId + "?friendPage=" + friendPage + "&pendingPage=" + pendingPage + "&findFriendsPage=" + findFriendsPage + "&tab=" + tab;
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            model.addAttribute("error", e.getMessage());
+            return listFriendsAndRequests(currentUserId, friendPage, pendingPage, findFriendsPage, tab,session, model);
+        }
     }
 }

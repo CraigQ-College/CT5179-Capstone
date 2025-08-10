@@ -11,38 +11,67 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- Custom VFC Styles -->
     <link href="/assets/styles/style.css" rel="stylesheet">
+    <style>
+        .btn-link.active {
+            color: #6EACDA !important;
+            font-weight: 600;
+        }
+        .btn-link:hover {
+            color: #6EACDA !important;
+            text-decoration: none;
+        }
+        .hover-bg-light:hover {
+            background-color: #2d2d2d !important;
+        }
+        .user-stats-item:hover {
+            background-color: #2d2d2d !important;
+        }
+        /* Ensure form stays within middle column */
+        .workout-form-container {
+            max-width: 100%; /* Prevent overflow beyond column */
+        }
+        .error.hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body class="bg-dark text-light">
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
     <div class="container">
         <!-- Logo and Brand -->
-        <a class="navbar-brand" href="/dashboard">
+        <a class="navbar-brand" th:href="@{/users/dashboard}">
             <img src="/assets/images/logo.png" alt="VFC Logo" height="30">
         </a>
+
         <!-- Mobile Toggle Button -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <!-- Navigation Links -->
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/users/dashboard}"><i class="bi bi-house-door"></i> Dashboard</a>
+                    <a class="nav-link active" th:href="@{/users/dashboard}"><i class="bi bi-house-door"></i> Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" th:href="@{/workouts/addWorkout(userId=${user.userId})}"><i class="bi bi-plus-circle"></i> Log Workout</a>
+                    <a class="nav-link" th:href="@{/workouts/addWorkout(userId=${user.userId})}"><i class="bi bi-plus-circle"></i> Log Workout</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/meals/addMeal(userId=${user.userId})}"><i class="bi bi-cup-hot"></i> Log Meal</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/challenges"><i class="bi bi-trophy"></i> Challenges</a>
+                    <a class="nav-link" th:href="@{/posts/add-post}"><i class="bi bi-house-door"></i> Post Message</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/leaderboard"><i class="bi bi-bar-chart"></i> Leaderboard</a>
+                    <a class="nav-link" th:href="@{/users/friends(tab='pending')}"><i class="bi bi-people"></i> Friend Requests</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/users/friends(tab='find-friends')}"><i class="bi bi-search"></i> Find Friends</a>
                 </li>
             </ul>
+
             <!-- User Menu -->
             <div class="navbar-nav">
                 <div class="nav-item dropdown">
@@ -50,10 +79,9 @@
                         <i class="bi bi-person-circle"></i> <span th:text="${user.userName}">User</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark">
-                        <li><a class="dropdown-item" href="/profile"><i class="bi bi-person"></i> Profile</a></li>
-                        <li><a class="dropdown-item" href="/settings"><i class="bi bi-gear"></i> Settings</a></li>
+                        <li><a class="dropdown-item" th:href="@{/users/users/{id}(id=${user.userId})}"><i class="bi bi-person"></i> Profile</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                        <li><a class="dropdown-item" th:href="@{/users/logout}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
                     </ul>
                 </div>
             </div>
@@ -61,76 +89,114 @@
     </div>
 </nav>
 
-
-<!-- Main Content -->
-<div class="container py-4">
-    <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col">
-            <h2>Log Your Workout</h2>
-            <p class="text-muted">Track your exercise and stay on top of your fitness goals.</p>
-        </div>
-    </div>
-
-    <!-- Workout Form -->
+<!-- Main Content - Two Column Layout -->
+<div class="container-fluid py-4">
     <div class="row">
-        <div class="col-md-12 mx-auto">
-            <div class="card bg-dark border-secondary">
-                <div class="card-body">
-                    <form th:action="@{/workouts/saveWorkout}" th:object="${workout}" method="post" onsubmit="return validateForm()">
-                        <!-- Hidden User ID -->
-                        <input type="hidden" th:field="*{userId}" th:value="${user.userId}" />
-
-                        <!-- Workout Date -->
-                        <div class="mb-3">
-                            <label for="workoutDate" class="form-label text-light">Workout Date and Time</label>
-                            <input type="datetime-local" class="form-control bg-dark text-light border-secondary" id="workoutDate" th:field="*{workoutDate}" required>
-                            <span th:errors="*{workoutDate}" class="error text-danger"></span>
-                        </div>
-
-                        <!-- Exercise Entries Container -->
-                        <div id="exercise-entries">
-                            <div id="cardioFormsContainer"></div>
-                            <div id="weightliftingFormsContainer"></div>
-                        </div>
-
-                        <!-- Add Exercise Buttons -->
-                        <div class="mb-3">
-                            <button type="button" onclick="addCardioForm()" class="btn btn-outline-primary me-2">
-                                <i class="bi bi-plus-circle"></i> Add Cardio
-                            </button>
-                            <button type="button" onclick="addWeightliftingForm()" class="btn btn-outline-primary">
-                                <i class="bi bi-plus-circle"></i> Add Weightlifting
-                            </button>
-                        </div>
-
-                        <!-- Notes Field -->
-                        <div class="mb-3">
-                            <label for="notes" class="form-label text-light">Notes</label>
-                            <textarea class="form-control bg-dark text-light border-secondary" id="notes" th:field="*{notes}" rows="3" placeholder="Add any notes about your workout..."></textarea>
-                            <span th:errors="*{notes}" class="error text-danger"></span>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle"></i> Log Workout
-                            </button>
-                            <a th:href="@{/users/dashboard}" class="btn btn-secondary">
-                                <i class="bi bi-x-circle"></i> Cancel
+        <!-- Left Sidebar - Navigation -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            <div class="sticky-top" style="top: 20px;">
+                <!-- Main Navigation -->
+                <div class="card bg-dark border-secondary mb-4">
+                    <div class="card-body">
+                        <h6 class="text-white mb-3">Navigation</h6>
+                        <div class="d-flex flex-column gap-3">
+                            <a th:href="@{/users/dashboard}" class="btn btn-link text-white text-start p-0 border-0 active">
+                                <i class="bi bi-house-door me-2"></i>My Dashboard
+                            </a>
+                            <a th:href="@{/posts/listFeed}" class="btn btn-link text-white text-start p-0 border-0 active">
+                                <i class="bi bi-house-door me-2"></i>My Newsfeed
+                            </a>
+                            <a th:href="@{/posts/listPosts}" class="btn btn-link text-white text-start p-0 border-0 active">
+                                <i class="bi bi-file-post me-2"></i>My Posts
+                            </a>
+                            <a th:href="@{/meals/listMeals}" class="btn btn-link text-white text-start p-0 border-0 active">
+                                <i class="bi bi-cup-hot me-2"></i>My Meals
+                            </a>
+                            <a th:href="@{/workouts/listWorkouts}" class="btn btn-link text-white text-start p-0 border-0 active">
+                                <i class="bi bi-plus-circle me-2"></i>My Workouts
+                            </a>
+                            <a th:href="@{/users/friends/{id}(id=${session.user.userId})}" class="btn btn-link text-white text-start p-0 active">
+                                <i class="bi bi-person-plus me-2"></i>My Friends
+                            </a>
+                            <br>
+                            <a th:href="@{/users/logout}" class="btn btn-link text-white text-start p-0 active">
+                                <i class="bi bi-box-arrow-right me-2"></i>Logout
                             </a>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <!-- Error Message -->
-                        <div id="errorMessage" class="error text-danger mt-3 hidden"></div>
-                    </form>
+        <!-- Main Content - Workout Form (Original Size, Middle Section Only) -->
+        <div class="col-lg-6 col-md-8">
+            <div class="workout-form-container">
+                <div class="card bg-dark border-secondary mb-4">
+                    <div class="card-body">
+                        <!-- Page Header -->
+                        <div class="row mb-4">
+                            <div class="col">
+                                <h2 class="text-white">Log Your Workout</h2>
+                                <p class="text-muted">Track your exercise and stay on top of your fitness goals.</p>
+                            </div>
+                        </div>
+
+                        <!-- Workout Form -->
+                        <form th:action="@{/workouts/saveWorkout}" th:object="${workout}" method="post" onsubmit="return validateForm()">
+                            <!-- Hidden User ID -->
+                            <input type="hidden" th:field="*{userId}" th:value="${user.userId}" />
+
+                            <!-- Workout Date -->
+                            <div class="mb-3">
+                                <label for="workoutDate" class="form-label text-light">Workout Date and Time</label>
+                                <input type="datetime-local" class="form-control bg-dark text-light border-secondary" id="workoutDate" th:field="*{workoutDate}" required>
+                                <span th:errors="*{workoutDate}" class="error text-danger"></span>
+                            </div>
+
+                            <!-- Exercise Entries Container -->
+                            <div id="exercise-entries" class="mb-3">
+                                <div id="cardioFormsContainer"></div>
+                                <div id="weightliftingFormsContainer"></div>
+                            </div>
+
+                            <!-- Add Exercise Buttons -->
+                            <div class="mb-3">
+                                <button type="button" onclick="addCardioForm()" class="btn btn-outline-primary me-2">
+                                    <i class="bi bi-plus-circle"></i> Add Cardio
+                                </button>
+                                <button type="button" onclick="addWeightliftingForm()" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-circle"></i> Add Weightlifting
+                                </button>
+                            </div>
+
+                            <!-- Notes Field -->
+                            <div class="mb-3">
+                                <label for="notes" class="form-label text-light">Notes</label>
+                                <textarea class="form-control bg-dark text-light border-secondary" id="notes" th:field="*{notes}" rows="3" placeholder="Add any notes about your workout..."></textarea>
+                                <span th:errors="*{notes}" class="error text-danger"></span>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Log Workout
+                                </button>
+                                <a th:href="@{/users/dashboard}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                            </div>
+
+                            <!-- Error Message -->
+                            <div id="errorMessage" class="error text-danger mt-3 hidden"></div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Bootstrap JS and Popper.js -->
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous"></script>
 <script>
     let exerciseCount = 0;

@@ -1,8 +1,6 @@
 package com.vfc.vfc_backend.controller;
 
-import com.vfc.vfc_backend.model.User;
-import com.vfc.vfc_backend.model.Workout;
-import com.vfc.vfc_backend.model.WorkoutExercise;
+import com.vfc.vfc_backend.model.*;
 import com.vfc.vfc_backend.service.WorkoutService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +19,10 @@ public class WorkoutController {
 
     @Autowired
     private WorkoutService workoutService;
+
+    public WorkoutController(WorkoutService workoutService) {
+        this.workoutService = workoutService;
+    }
 
     @GetMapping("/addWorkout")
     public String showFormForAddWorkout(@ModelAttribute("workout") Workout theWorkout, HttpSession session, Model model){
@@ -46,10 +50,11 @@ public class WorkoutController {
         }
         workoutService.save(theWorkout);
         model.addAttribute("userId", theWorkout.getUserId());
-        return "redirect:/users/dashboard";
+        return "redirect:/workouts/listWorkouts";
     }
 
 
+/*
     @GetMapping("/listWorkouts")
     public String listWorkouts(HttpSession session, Model model) {
 
@@ -61,7 +66,42 @@ public class WorkoutController {
         List<Workout> workouts = workoutService.getWorkoutsByUserId(user.getUserId());
         model.addAttribute("workouts", workouts);
         model.addAttribute("userId", user.getUserId());
+        model.addAttribute("user", user);
         model.addAttribute("userName", user.getUserName());
+        return "list-workouts";
+    }*/
+
+    @GetMapping("/listWorkouts")
+    public String listWorkouts( @RequestParam(defaultValue = "1") int workoutPage,
+                                        HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        int userId = user.getUserId();
+        int pageSize = 5;
+
+        // Workouts
+        List<Workout> workouts = workoutService.getWorkoutsByUserId(userId, workoutPage, pageSize);
+        long totalWorkouts = workoutService.countWorkoutsByUserId(userId);
+        int totalWorkoutPages = (int) Math.ceil((double) totalWorkouts / pageSize);
+
+
+
+        String name = user.getUserName();
+        // Add to model
+        model.addAttribute("workouts", workouts);
+
+        model.addAttribute("userId", userId);
+        //model.addAttribute("userName", sessionUser.getUserName());
+
+        model.addAttribute("currentWorkoutPage", workoutPage);
+        model.addAttribute("totalWorkoutPages", totalWorkoutPages);
+
+        model.addAttribute("user", user);
+        model.addAttribute("userName", name);
+
         return "list-workouts";
     }
 
@@ -85,14 +125,58 @@ public class WorkoutController {
         int userId =  workout.getUserId();
         //delete the employee
         workoutService.deleteById(workoutId);
-        //redirect to the dashboard
-        return "redirect:/users/dashboard";
+        //redirect to the /employees/list
+        return "redirect:/workouts/listWorkouts";
+        //return "list-workouts";
+        //return "redirect:/workouts/workouts?userId=" + userId;
     }
 
+
     @GetMapping("/viewWorkout/{workoutId}")
-    public String viewWorkout(@PathVariable("workoutId") int workoutId, Model model) {
-        Workout workout = workoutService.getWorkoutById(workoutId);
+    public String viewWorkout(@PathVariable("workoutId") int workoutId,HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        int userId = user.getUserId();
+
+        Workout workout = workoutService.findByIdWithExercises(workoutId); // Fetch workout with exercises
+        /*if (workout == null) {
+            model.addAttribute("workout", null);
+            model.addAttribute("user", userService.findById(0)); // Replace with actual user logic
+            model.addAttribute("friends", userService.getFriends(0)); // Replace with actual user logic
+            return "view-workout";
+        }*/
         model.addAttribute("workout", workout);
+        model.addAttribute("userId", userId);
+        model.addAttribute("user", user);
         return "view-workout";
     }
+
+    /*
+    @GetMapping("/viewWorkout/{id}")
+    public String viewWorkout(@PathVariable("id") int workoutId, Model model) {
+        Workout workout = workoutService.findByIdWithExercises(workoutId); // Use a method that fetches exercises
+        if (workout == null) {
+            model.addAttribute("workout", null);
+            model.addAttribute("user", userService.findById(0)); // Replace with actual user logic
+            model.addAttribute("friends", userService.getFriends(0)); // Replace with actual user logic
+            return "view-workout";
+        }
+
+        // Calculate daily calories burned
+        LocalDate workoutDate = workout.getWorkoutDate().toLocalDate();
+        LocalDateTime startOfDay = workoutDate.atStartOfDay();
+        LocalDateTime endOfDay = workoutDate.atTime(23, 59, 59);
+        List<Workout> dailyWorkouts = workoutService.findByUserIdAndDateRange(
+                workout.getUserId(), startOfDay, endOfDay);
+        int dailyCaloriesBurned = dailyWorkouts.stream()
+                .flatMap(w -> w.getWorkoutExercises().stream())
+                .mapToInt(ex -> ex.getCaloriesBurned() != null ? ex.getCaloriesBurned() : 0)
+                .sum();
+
+        model.addAttribute("workout", workout);
+        model.addAttribute("user", userService.findById(workout.getUserId()));
+        //model.addAttribute("friends", userService.getFriends(workout.getUserId()));
+        model.addAttribute("dailyCaloriesBurned", dailyCaloriesBurned);
+
+        return "view-workout";
+    }*/
 }
