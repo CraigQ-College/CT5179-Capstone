@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <!-- Meta tags and title for the page -->
+  <meta charset="UTF-8">
+  <title>Dashboard - VFC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS for styling -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <!-- Custom VFC Styles -->
+  <link href="/assets/styles/style.css" rel="stylesheet">
+  <style>
+    .btn-link.active {
+        color: #6EACDA !important;
+        font-weight: 600;
+    }
+    .btn-link:hover {
+        color: #6EACDA !important;
+        text-decoration: none;
+    }
+    .hover-bg-light:hover {
+        background-color: #2d2d2d !important;
+    }
+    .user-stats-item:hover {
+        background-color: #2d2d2d !important;
+    }
+  </style>
+</head>
+<body class="bg-dark text-light">
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
+  <div class="container">
+    <!-- Logo and Brand -->
+    <a class="navbar-brand" th:href="@{/users/dashboard}">
+      <img src="/assets/images/logo.png" alt="VFC Logo" height="30">
+    </a>
+
+    <!-- Mobile Toggle Button -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navigation Links -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link active" th:href="@{/users/dashboard}"><i class="bi bi-house-door"></i> Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/workouts/addWorkout(userId=${user.userId})}"><i class="bi bi-plus-circle"></i> Log Workout</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/meals/addMeal(userId=${user.userId})}"><i class="bi bi-cup-hot"></i> Log Meal</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/posts/add-post}"><i class="bi bi-house-door"></i> Post Message</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/users/friends(tab='pending')}"><i class="bi bi-people"></i> Friend Requests</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/users/friends(tab='find-friends')}"><i class="bi bi-search"></i> Find Friends</a>
+        </li>
+      </ul>
+
+      <!-- User Menu -->
+      <div class="navbar-nav">
+        <div class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle"></i> <span th:text="${user.userName}">User</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark">
+            <li><a class="dropdown-item" th:href="@{/users/users/{id}(id=${user.userId})}"><i class="bi bi-person"></i> Profile</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" th:href="@{/users/logout}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content - Two Column Layout -->
+<div class="container-fluid py-4">
+  <div class="row">
+    <!-- Left Sidebar - Navigation -->
+    <div class="col-lg-3 col-md-4 mb-4">
+      <div class="sticky-top" style="top: 20px;">
+        <!-- Main Navigation -->
+        <div class="card bg-dark border-secondary mb-4">
+          <div class="card-body">
+            <h6 class="text-white mb-3">Navigation</h6>
+            <div class="d-flex flex-column gap-3">
+              <a th:href="@{/users/dashboard}" class="btn btn-link text-white text-start p-0 border-0 active">
+                <i class="bi bi-house-door me-2"></i>My Dashboard
+              </a>
+              <a th:href="@{/posts/listFeed}" class="btn btn-link text-white text-start p-0 border-0 active">
+                <i class="bi bi-house-door me-2"></i>My Newsfeed
+              </a>
+              <a th:href="@{/posts/listPosts}" class="btn btn-link text-white text-start p-0 border-0 active">
+                <i class="bi bi-file-post me-2"></i>My Posts
+              </a>
+              <a th:href="@{/meals/listMeals}" class="btn btn-link text-white text-start p-0 border-0 active">
+                <i class="bi bi-cup-hot me-2"></i>My Meals
+              </a>
+              <a th:href="@{/meals/listMeals}" class="btn btn-link text-white text-start p-0 border-0 active">
+                <i class="bi bi-plus-circle me-2"></i>My Workouts
+              </a>
+              <a th:href="@{/users/friends/{id}(id=${session.user.userId})}" class="btn btn-link text-white text-start p-0 active">
+                <i class="bi bi-person-plus me-2"></i>My Friends
+              </a>
+              <br>
+              <a th:href="@{/users/logout}" class="btn btn-link text-white text-start p-0 active">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content - Add Post Form -->
+    <div class="col-lg-9 col-md-8">
+      <div class="card bg-dark border-secondary mb-4">
+        <div class="card-body">
+          <!-- Page Header -->
+          <div class="mb-4">
+            <h2 class="text-white">Add New Post</h2>
+            <p class="text-muted" th:if="${user != null}" th:text="'Posting as: ' + ${user.userName}"></p>
+          </div>
+
+          <!-- Post Form -->
+          <form th:action="@{/posts/save-post}" th:object="${post}" method="post">
+            <!-- Hidden User ID -->
+            <input type="hidden" th:field="*{userId}" />
+            <!-- CSRF Token -->
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <!-- Post Message -->
+            <div class="mb-3">
+              <label for="postMessage" class="form-label text-white">Your Post</label>
+              <textarea class="form-control bg-dark text-white border-secondary" id="postMessage" th:field="*{postMessage}" rows="5" placeholder="Enter your post" required></textarea>
+              <div class="error text-danger mt-2" th:if="${#fields.hasErrors('postMessage')}" th:errors="*{postMessage}"></div>
+            </div>
+            <!-- Submit Button -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="submit" class="btn btn-primary me-md-2">
+                <i class="bi bi-check-circle"></i> Submit Post
+              </button>
+              <a th:href="@{/posts/listPosts}" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

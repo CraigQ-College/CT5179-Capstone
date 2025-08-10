@@ -11,6 +11,7 @@ public class FriendRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int requestId;
 
+
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
@@ -28,10 +29,24 @@ public class FriendRequest {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
+/*
+    public int getSenderId() {
+        return senderId;
+    }
 
+    public void setSenderId(int senderId) {
+        this.senderId = senderId;
+    }
 
+    public int getReceiverId() {
+        return receiverId;
+    }
 
-    // Getters and setters
+    public void setReceiverId(int receiverId) {
+        this.receiverId = receiverId;
+    }*/
+
+// Getters and setters
 
     public int getRequestId() {
         return requestId;
@@ -40,6 +55,7 @@ public class FriendRequest {
     public void setRequestId(int requestId) {
         this.requestId = requestId;
     }
+
 
     public User getSender() {
         return sender;
@@ -55,6 +71,7 @@ public class FriendRequest {
     public void setSenderId(){
         
     }
+
 
     public User getReceiver() {
         return receiver;

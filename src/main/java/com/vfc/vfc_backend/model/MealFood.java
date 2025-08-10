@@ -30,6 +30,7 @@ public class MealFood {
     }
 
     @Column(name = "meal_food_calories")
+
     private double mealFoodCalories;
 
     @Column(name = "meal_food_name")
